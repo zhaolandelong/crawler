@@ -48,7 +48,9 @@ function saveTxt($, i) {
         const $me = $(this);
         if ($me.find('strong').text() === '楼主') {
             let _txt = $me.next().find('.bbs-content').text();
-            /回复日期：/.test(_txt) || (txt += _txt);
+            if (_txt.length > 100 && !/回复日期：/.test(_txt)) {
+                txt += _txt;
+            }
         }
     });
     // let $contents = $('.bbs-content');
