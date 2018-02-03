@@ -5,7 +5,7 @@ const cheerio = require('cheerio');
 const request = require('request');
 
 let i = 1;
-const maxPage = 30;
+const maxPage = 244;
 const returnUrl = i => `http://bbs.tianya.cn/post-16-705301-${i}.shtml`;
 // let url = 'https://www.baidu.com';
 
@@ -56,7 +56,7 @@ function saveTxt($, i) {
     // let $contents = $('.bbs-content');
     // console.log('test', i, $contents.length);
     const _txt = txt.replace(/\s+/g, '\n');
-    fs.appendFile('.data/xiaoshuo.txt', _txt, 'utf-8', err => {
+    fs.appendFile('./data/xiaoshuo.txt', _txt, 'utf-8', err => {
         err && console.log(err);
     });
 };
