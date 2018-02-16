@@ -6,7 +6,8 @@ const cheerio = require('cheerio');
 const request = require('request');
 
 const domain = 'https://www.javbus.info';
-const urls = ['/search/%E5%BD%BC%E5%A5%B3%E3%81%AE%E8%A6%AA%E5%8F%8B', '/label/5xf','/label/ms'];
+// const urls = ['/series/bdr'];//test url
+const urls = ['/search/%E5%BD%BC%E5%A5%B3%E3%81%AE%E8%A6%AA%E5%8F%8B', '/label/5xf', '/label/ms'];
 
 const service = https;
 
@@ -24,7 +25,7 @@ function getList(url) {
                 $pagi = $('.pagination');
             $('.movie-box').each(function (i) {
                 const picUrl = $(this).attr('href');
-                getPics(picUrl);
+                getItem(picUrl);
             });
             //有翻页的情况
             if ($pagi.length) {
@@ -40,7 +41,7 @@ function getList(url) {
     });
 }
 
-function getPics(url) {
+function getItem(url) {
     service.get(url, res => {
         let html;
 
@@ -50,7 +51,8 @@ function getPics(url) {
         });
         res.on('end', () => {
             const $ = cheerio.load(html);
-            savePics($, url);
+            saveInfo($, url);
+            // savePics($, url);
         });
     }).on('error', err => {
         err && console.log(err);
@@ -71,6 +73,30 @@ function savePics($, url) {
             });
         })
     }
+}
+
+function saveInfo($, url) {
+    const title = $('h3').text(),
+        $info = $('div.info'),
+        $datas = $info.children('p'),
+        $actress = $info.children('ul').find('.star-name'),
+        links = $('#magnet-table').text();
+    const code = $datas.eq(0).text(),
+        date = $datas.eq(1).text(),
+        duration = $datas.eq(2).text(),
+        publisher = $datas.eq(5).text(),
+        series = $datas.eq(6).text();
+    let actress = '';
+    $actress.each(function () {
+        actress += $(this).text() + '\t';
+    });
+    let _txt = `${title}\t${url}\t${code}\t${date}\t${duration}\t${publisher}\t${series}\t演员：${actress}`.replace(/\s{2,}/g, '\t');
+    _txt += '\n';
+    // console.log(_txt)
+    // let _txt = (title + '\t' + url).replace(/\s{2,}/g, '\t') + '\n';
+    fs.appendFile('./data/avInfo.txt', _txt, 'utf-8', err => {
+        err && console.log(err);
+    });
 }
 
 urls.forEach(url => {
