@@ -36,7 +36,7 @@ inquirer
         const { fields, data } = formatJsonpData2csv(res.fontMap, res.data);
         const csv = parse(data, { fields });
         console.log(`${performancePath} download finish`);
-        fs.writeFile(performancePath, csv, err => {
+        fs.writeFile(performancePath, csv, 'utf-8', err => {
           if (err) console.warn(err);
         });
       });
@@ -57,7 +57,7 @@ inquirer
           );
           console.log(`${path} download finish`);
           const csv = parse(data, { fields });
-          fs.writeFile(path, csv, err => {
+          fs.writeFile(path, csv, 'utf-8', err => {
             if (err) console.warn(err);
           });
         });
