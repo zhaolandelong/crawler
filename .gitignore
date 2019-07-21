@@ -1,7 +1,11 @@
 .DS_Store
 node_modules/
 dist/
-data/
+data/*
+mock/
+!data/_stock.bat
+!data/diy_report.csv
+!data/diy_report.xls
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
