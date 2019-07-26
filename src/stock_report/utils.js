@@ -1,14 +1,14 @@
 const _ = require("lodash");
 const axios = require("axios");
+const Iconv = require("iconv-lite");
 const strRandom = require("string-random");
 const { TOKEN, HEADER_MAP } = require("./constants");
 /**
  * @param { data:{}, font: { FontMapping:{ code: string; value: string }[] } } res
  */
-function formatJsonpData2csv(res) {
-  const fontMap = _.get(res, "font.FontMapping", []);
+function formatJsonpData2csv(fontMap, rootData) {
   let fields;
-  const data = _.get(res, "data", []).map(da => {
+  const data = rootData.map(da => {
     const result = {};
     if (!fields) {
       fields = formatCsvFields(Object.keys(da));
@@ -71,8 +71,41 @@ function fetchStockReport(params) {
       return rootData;
     });
 }
+
+function fetchPerformanceReport(stockCode) {
+  return new Promise((rev, rej) => {
+    axios({
+      url: `http://data.eastmoney.com/bbsj/yjbb/${stockCode}.html`,
+      responseType: "stream" //将数据转化为流返回
+    }).then(res => {
+      //此时的res.data 则为stream
+      let chunks = [];
+      res.data.on("data", chunk => {
+        chunks.push(chunk);
+      });
+      res.data.on("end", () => {
+        let buffer = Buffer.concat(chunks);
+
+        const htmlStr = Iconv.decode(buffer, "gbk").toString();
+
+        const fontMapMath = htmlStr.match(/"FontMapping":(\[.+"value":0}])/);
+        const fontMap = JSON.parse(_.get(fontMapMath, "[1]", "[]"));
+
+        const dataMatch = htmlStr.match(/data: (\[.+\]),font:/);
+        const data = JSON.parse(_.get(dataMatch, "[1]", "[]"));
+
+        rev({
+          fontMap,
+          data
+        });
+      });
+    });
+  });
+}
+
 module.exports = {
   formatJsonpData2csv,
   returnJsonpData,
-  fetchStockReport
+  fetchStockReport,
+  fetchPerformanceReport
 };
