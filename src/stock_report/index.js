@@ -9,7 +9,9 @@ const {
 } = require("./utils");
 const { REPORT_TYPE, DATA_PATH } = require("./constants");
 const mockData = require("./mockData");
-
+if (!fs.existsSync(DATA_PATH)) {
+  fs.mkdirSync(DATA_PATH);
+}
 inquirer
   .prompt([
     {

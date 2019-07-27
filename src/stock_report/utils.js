@@ -1,6 +1,6 @@
 const _ = require("lodash");
 const axios = require("axios");
-const Iconv = require("iconv-lite");
+const iconv = require("iconv-lite");
 const strRandom = require("string-random");
 const { TOKEN, HEADER_MAP } = require("./constants");
 /**
@@ -30,7 +30,7 @@ function formatJsonpData2csv(fontMap, rootData) {
 
 function formatCsvFields(fields) {
   return fields.map(fKey => ({
-    label: HEADER_MAP[fKey] || fKey,
+    label: (HEADER_MAP[fKey] || "") + "_" + fKey,
     value: fKey
   }));
 }
@@ -86,7 +86,7 @@ function fetchPerformanceReport(stockCode) {
       res.data.on("end", () => {
         let buffer = Buffer.concat(chunks);
 
-        const htmlStr = Iconv.decode(buffer, "gbk").toString();
+        const htmlStr = iconv.decode(buffer, "gbk");
 
         const fontMapMath = htmlStr.match(/"FontMapping":(\[.+"value":0}])/);
         const fontMap = JSON.parse(_.get(fontMapMath, "[1]", "[]"));

@@ -1,18 +1,20 @@
+const path = require("path");
+
 module.exports = {
   TOKEN: "70f12f2f4f091e459a279469fe49eca5",
-  DATA_PATH: "./data",
+  DATA_PATH: path.resolve(__dirname, "../../data"),
   REPORT_TYPE: {
-    xjllb: {
+    cash: {
       label: "现金流量表",
       type: "CWBB_XJLLB20",
       rt: 52137153
     },
-    lrb: {
+    profit: {
       label: "利润表",
       type: "CWBB_LRB20",
       rt: 52137490
     },
-    zcfzb: {
+    balance: {
       label: "资产负债表",
       type: "CWBB_ZCFZB20",
       rt: 52137497
