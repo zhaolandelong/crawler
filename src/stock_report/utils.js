@@ -1,8 +1,19 @@
 const _ = require("lodash");
+const fs = require("fs");
 const axios = require("axios");
 const iconv = require("iconv-lite");
 const strRandom = require("string-random");
-const { TOKEN, HEADER_MAP } = require("./constants");
+const { parse } = require("json2csv");
+const { TOKEN, HEADER_MAP, MOCK_PATH } = require("./constants");
+
+module.exports = {
+  formatJsonpData2csv,
+  returnJsonpData,
+  fetchStockReport,
+  fetchPerformanceReport,
+  buildDiy
+};
+
 /**
  * @param { data:{}, font: { FontMapping:{ code: string; value: string }[] } } res
  */
@@ -50,6 +61,15 @@ function fetchStockReport(params) {
     console.warn("[type] is required in [fetchStockReport] !");
     return;
   }
+  const stockMockPath = `${MOCK_PATH}/${stockCode}_${params.type}.json`;
+  if (fs.existsSync(stockMockPath)) {
+    return new Promise((rev, rej) => {
+      fs.readFile(stockMockPath, (err, data) => {
+        if (err) rej(err);
+        rev(JSON.parse(data));
+      });
+    });
+  }
   const jsonp = strRandom(6, { numbers: false });
 
   const baseParams = {
@@ -73,6 +93,15 @@ function fetchStockReport(params) {
 }
 
 function fetchPerformanceReport(stockCode) {
+  const performanceMockPath = `${MOCK_PATH}/${stockCode}_performance.json`;
+  if (fs.existsSync(performanceMockPath)) {
+    return new Promise((rev, rej) => {
+      fs.readFile(performanceMockPath, (err, data) => {
+        if (err) rej(err);
+        rev(JSON.parse(data));
+      });
+    });
+  }
   return new Promise((rev, rej) => {
     axios({
       url: `http://data.eastmoney.com/bbsj/yjbb/${stockCode}.html`,
@@ -103,9 +132,82 @@ function fetchPerformanceReport(stockCode) {
   });
 }
 
-module.exports = {
-  formatJsonpData2csv,
-  returnJsonpData,
-  fetchStockReport,
-  fetchPerformanceReport
-};
+function buildDiy(data) {
+  const totalData = _.merge(...data).filter(data => {
+    return [
+      "2019-06-30T00:00:00",
+      "2019-03-31T00:00:00",
+      "2018-12-31T00:00:00",
+      "2017-12-31T00:00:00",
+      "2016-12-31T00:00:00"
+    ].includes(data.reportdate);
+  });
+
+  const csv = parse(totalData, {
+    fields: [
+      {
+        label: "代码",
+        value: "scode"
+      },
+      {
+        label: "名称",
+        value: "sname"
+      },
+      {
+        label: "报告期",
+        value: "reportdate"
+      },
+      {
+        label: "行业",
+        value: "publishname"
+      },
+      {
+        label: "营业总收入(元)",
+        value: "totaloperatereve"
+      },
+      {
+        label: "同比增长(%)",
+        value: "ystz"
+      },
+      {
+        label: "季度环比增长(%)",
+        value: "yshz"
+      },
+      {
+        label: "销售商品、提供劳务收到的现金",
+        value: "salegoodsservicerec"
+      },
+      {
+        label: "销售商品、提供劳务收到的现金占比",
+        value: "salegoodsservicerec_zb"
+      },
+      {
+        label: "净利润(元)",
+        value: "parentnetprofit"
+      },
+      {
+        label: "净利润同比(%)",
+        value: "sjltz"
+      },
+      {
+        label: "季度环比增长(%)",
+        value: "sjlhz"
+      },
+      {
+        label: "销售毛利率(%)",
+        value: "xsmll"
+      },
+      {
+        label: "总负债(元)",
+        value: "sumliab"
+      },
+      {
+        label: "总负债同比(%)",
+        value: "tdetz"
+      }
+    ]
+  });
+  fs.appendFile(`./data/diy_report.csv`, csv, "utf-8", err => {
+    err && console.log(err);
+  });
+}

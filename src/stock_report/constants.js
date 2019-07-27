@@ -3,6 +3,7 @@ const path = require("path");
 module.exports = {
   TOKEN: "70f12f2f4f091e459a279469fe49eca5",
   DATA_PATH: path.resolve(__dirname, "../../data"),
+  MOCK_PATH: path.resolve(__dirname, "../../mock"),
   ENCODING: "utf8",
   REPORT_TYPE: {
     cash: {
