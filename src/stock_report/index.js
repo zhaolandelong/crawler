@@ -7,8 +7,8 @@ const {
   fetchStockReport,
   fetchPerformanceReport
 } = require("./utils");
-const { REPORT_TYPE, DATA_PATH } = require("./constants");
-const mockData = require("./mockData");
+const { REPORT_TYPE, DATA_PATH, ENCODING } = require("./constants");
+
 if (!fs.existsSync(DATA_PATH)) {
   fs.mkdirSync(DATA_PATH);
 }
@@ -33,10 +33,18 @@ inquirer
     const performancePath = `${DATA_PATH}/${stockCode}_performance.csv`;
     if (!fs.existsSync(performancePath)) {
       fetchPerformanceReport(stockCode).then(res => {
+        // fs.writeFile(
+        //   `./mock/${stockCode}_performance.json`,
+        //   JSON.stringify(res, null, 2),
+        //   ENCODING,
+        //   err => {
+        //     if (err) console.warn(err);
+        //   }
+        // );
         const { fields, data } = formatJsonpData2csv(res.fontMap, res.data);
         const csv = parse(data, { fields });
         console.log(`${performancePath} download finish`);
-        fs.writeFile(performancePath, csv, 'utf-8', err => {
+        fs.writeFile(performancePath, csv, ENCODING, err => {
           if (err) console.warn(err);
         });
       });
@@ -51,13 +59,21 @@ inquirer
           stockCode,
           ...report
         }).then(res => {
+          // fs.writeFile(
+          //   `./mock/${stockCode}_${reportType}.json`,
+          //   JSON.stringify(res, null, 2),
+          //   ENCODING,
+          //   err => {
+          //     if (err) console.warn(err);
+          //   }
+          // );
           const { fields, data } = formatJsonpData2csv(
             _.get(res, "font.FontMapping", []),
             _.get(res, "data", [])
           );
           console.log(`${path} download finish`);
           const csv = parse(data, { fields });
-          fs.writeFile(path, csv, 'utf-8', err => {
+          fs.writeFile(path, csv, ENCODING, err => {
             if (err) console.warn(err);
           });
         });
