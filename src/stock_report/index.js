@@ -36,14 +36,15 @@ inquirer
       // if (!fs.existsSync(performancePath)) {
       promiseArr.push(
         fetchPerformanceReport(stockCode).then(res => {
-          fs.writeFile(
-            `${MOCK_PATH}/${stockCode}_performance.json`,
-            JSON.stringify(res, null, 2),
-            ENCODING,
-            err => {
-              if (err) console.warn(err);
-            }
-          );
+          // just use to mock
+          // fs.writeFile(
+          //   `${MOCK_PATH}/${stockCode}_performance.json`,
+          //   JSON.stringify(res, null, 2),
+          //   ENCODING,
+          //   err => {
+          //     if (err) console.warn(err);
+          //   }
+          // );
           const { fields, data } = formatJsonpData2csv(res.fontMap, res.data);
           const csv = parse(data, { fields });
           console.log(`${performancePath} download finish`);

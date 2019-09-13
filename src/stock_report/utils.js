@@ -4,7 +4,7 @@ const axios = require("axios");
 const iconv = require("iconv-lite");
 const strRandom = require("string-random");
 const { parse } = require("json2csv");
-const { TOKEN, HEADER_MAP, MOCK_PATH } = require("./constants");
+const { TOKEN, HEADER_MAP, MOCK_PATH, CURRENT_YEAR } = require("./constants");
 
 module.exports = {
   formatJsonpData2csv,
@@ -134,13 +134,16 @@ function fetchPerformanceReport(stockCode) {
 
 function buildDiy(data) {
   const totalData = _.merge(...data).filter(data => {
-    return [
-      "2019-06-30T00:00:00",
-      "2019-03-31T00:00:00",
-      "2018-12-31T00:00:00",
-      "2017-12-31T00:00:00",
-      "2016-12-31T00:00:00"
-    ].includes(data.reportdate);
+    const reportDate = data.reportdate;
+    // current year all report
+    // or
+    // recent 3 years year-report
+    return (
+      reportDate > String(CURRENT_YEAR) ||
+      new RegExp(
+        `^(${CURRENT_YEAR - 1}|${CURRENT_YEAR - 2}|${CURRENT_YEAR - 3})-12-31`
+      ).test(reportDate)
+    );
   });
 
   const csv = parse(totalData, {
