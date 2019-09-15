@@ -4,6 +4,7 @@ node_modules/
 dist/
 data/*
 mock/
+cache/
 !data/_stock.bat
 !data/diy_report.csv
 !data/diy_report.xls

@@ -7,8 +7,13 @@ import {
   fetchPerformanceReport,
   buildDiy
 } from "./utils";
-import { REPORT_TABLES, ReportTableValue, ReportType } from "./constants";
-import { DATA_PATH, MOCK_PATH, ENCODING } from "../constants";
+import {
+  REPORT_TABLES,
+  ReportTableValue,
+  ReportTypeWithoutStandard
+} from "./constants";
+import { DATA_PATH, MOCK_PATH, ENCODING, ReportType } from "../constants";
+import { updateCache } from "../utils";
 
 if (!fs.existsSync(DATA_PATH)) {
   fs.mkdirSync(DATA_PATH);
@@ -16,13 +21,13 @@ if (!fs.existsSync(DATA_PATH)) {
 
 export default {
   run(codeArr: string[]) {
-    codeArr.forEach(stockCode => {
+    codeArr.forEach(code => {
       const promiseArr = [];
       // 业绩报表
-      const performancePath = `${DATA_PATH}/${stockCode}_performance.csv`;
+      const performancePath = `${DATA_PATH}/${code}_performance.csv`;
       // if (!fs.existsSync(performancePath)) {
       promiseArr.push(
-        fetchPerformanceReport(stockCode).then(res => {
+        fetchPerformanceReport(code).then(res => {
           const { fields, data } = formatJsonpData2csv(res.fontMap, res.data);
           const csv = parse(data, { fields });
           console.log(`${performancePath} download finish`);
@@ -35,24 +40,19 @@ export default {
       // }
 
       // 现金流量表 利润表 资产负债表
-      Object.keys(REPORT_TABLES).forEach(reportType => {
-        const path = `${DATA_PATH}/${stockCode}_${reportType}.csv`;
-        // if (!fs.existsSync(path)) {
-        const report: ReportTableValue =
-          REPORT_TABLES[reportType as ReportType];
+      Object.keys(REPORT_TABLES).forEach(key => {
+        const reportType = key as ReportTypeWithoutStandard;
+        const path = `${DATA_PATH}/${code}_${key}.csv`;
         promiseArr.push(
           fetchStockReport({
-            stockCode,
-            ...report
+            code,
+            reportType
           }).then(res => {
-            fs.writeFile(
-              `${MOCK_PATH}/${stockCode}_${reportType}.json`,
-              JSON.stringify(res, null, 2),
-              ENCODING,
-              err => {
-                if (err) console.warn(err);
-              }
-            );
+            updateCache({
+              code,
+              reportType,
+              data: JSON.stringify(res, null, 2)
+            });
             const { fields, data } = formatJsonpData2csv(
               _.get(res, "font.FontMapping", []),
               _.get(res, "data", [])

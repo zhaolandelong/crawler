@@ -1,11 +1,17 @@
 import _ from "lodash";
 import fs from "fs";
 import axios from "axios";
-import iconv from "iconv-lite";
 import strRandom from "string-random";
 import { parse } from "json2csv";
-import { TOKEN, HEADER_MAP, ReportTableValue } from "./constants";
-import { MOCK_PATH, CURRENT_YEAR, ENCODING } from "../constants";
+import {
+  TOKEN,
+  HEADER_MAP,
+  ReportTableValue,
+  REPORT_TABLES,
+  ReportTypeWithoutStandard
+} from "./constants";
+import { MOCK_PATH, CURRENT_YEAR, ENCODING, ReportType } from "../constants";
+import { fetchHTML, getCache, updateCache } from "../utils";
 import { StringKV } from "../../typing";
 
 export interface FontMap {
@@ -83,91 +89,78 @@ export function returnJsonpData(varName: string, evalStr: string): any {
   return eval(`global.${varName}`);
 }
 
-export function fetchStockReport(
-  params: { stockCode: string } & ReportTableValue
-): Promise<RootData | null> {
-  const { stockCode, ...rest } = params;
-  if (!stockCode) {
-    console.warn("[stockCode] is required in [fetchStockReport] !");
+export function fetchStockReport(params: {
+  code: string;
+  reportType: ReportTypeWithoutStandard;
+}): Promise<RootData | null> {
+  const { code, reportType } = params;
+  if (!code) {
+    console.warn("[code] is required in [fetchStockReport] !");
     return new Promise(rev => rev(null));
   }
-  if (!params.type) {
+  if (!reportType) {
     console.warn("[type] is required in [fetchStockReport] !");
     return new Promise(rev => rev(null));
   }
-  const stockMockPath = `${MOCK_PATH}/${stockCode}_${params.type}.json`;
-  if (fs.existsSync(stockMockPath)) {
-    return new Promise((rev, rej) => {
-      fs.readFile(stockMockPath, ENCODING, (err, data) => {
-        if (err) rej(err);
-        rev(JSON.parse(data));
+  return getCache({
+    code,
+    reportType
+  }).then(data => {
+    if (data) return data as RootData;
+    const jsonp = strRandom(6, { numbers: false });
+    const { type, rt } = REPORT_TABLES[reportType];
+    const baseParams = {
+      filter: `(scode=${code})`, // 股票代码
+      js: `var ${jsonp}={pages:(tp),data: (x),font:(font)}`, // jsonp 数据结构
+      p: "1", // 页码
+      ps: "50", // pageSize
+      sr: "-1",
+      st: "reportdate",
+      token: TOKEN,
+      type,
+      rt
+    };
+    return axios
+      .get("http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get", {
+        params: _.merge(baseParams, params)
+      })
+      .then(res => {
+        const rootData = returnJsonpData(jsonp, res.data);
+        return rootData;
       });
-    });
-  }
-  const jsonp = strRandom(6, { numbers: false });
-
-  const baseParams = {
-    filter: `(scode=${stockCode})`, // 股票代码
-    js: `var ${jsonp}={pages:(tp),data: (x),font:(font)}`, // jsonp 数据结构
-    p: "1", // 页码
-    ps: "50", // pageSize
-    sr: "-1",
-    st: "reportdate",
-    token: TOKEN,
-    ...rest // rt type
-  };
-  return axios
-    .get("http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get", {
-      params: _.merge(baseParams, params)
-    })
-    .then(res => {
-      const rootData = returnJsonpData(jsonp, res.data);
-      return rootData;
-    });
+  });
 }
 
-export function fetchPerformanceReport(
-  stockCode: string
-): Promise<{
+type CnStandardRes = {
   fontMap: FontMap[];
   data: RootData[];
-}> {
-  const performanceMockPath = `${MOCK_PATH}/${stockCode}_performance.json`;
-  if (fs.existsSync(performanceMockPath)) {
-    return new Promise((rev, rej) => {
-      fs.readFile(performanceMockPath, ENCODING, (err, data) => {
-        if (err) rej(err);
-        rev(JSON.parse(data));
-      });
-    });
-  }
-  return new Promise((rev, rej) => {
-    axios({
-      url: `http://data.eastmoney.com/bbsj/yjbb/${stockCode}.html`,
-      responseType: "stream" //将数据转化为流返回
-    }).then(res => {
-      //此时的res.data 则为stream
-      let chunks: Buffer[] = [];
-      res.data.on("data", (chunk: Buffer) => {
-        chunks.push(chunk);
-      });
-      res.data.on("end", () => {
-        let buffer = Buffer.concat(chunks);
-
-        const htmlStr = iconv.decode(buffer, "gbk");
-
+};
+export function fetchPerformanceReport(code: string): Promise<CnStandardRes> {
+  return getCache({
+    code,
+    reportType: "standard"
+  }).then(standardData => {
+    if (standardData) return standardData as CnStandardRes;
+    return fetchHTML(`http://data.eastmoney.com/bbsj/yjbb/${code}.html`).then(
+      htmlStr => {
         const fontMapMath = htmlStr.match(/"FontMapping":(\[.+"value":0}])/);
         const fontMap = JSON.parse(_.get(fontMapMath, "[1]", "[]"));
 
         const dataMatch = htmlStr.match(/data: (\[.+\]),font:/);
         const data = JSON.parse(_.get(dataMatch, "[1]", "[]"));
-
-        rev({
+        const result = {
           fontMap,
           data
+        };
+        updateCache({
+          code,
+          reportType: "standard",
+          data: JSON.stringify(result, null, 2),
+          force: false
         });
-      });
-    });
+        return result;
+      }
+    );
   });
 }
 

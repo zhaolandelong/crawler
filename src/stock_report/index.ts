@@ -1,5 +1,6 @@
 import inquirer from "inquirer";
 import cn from "./cn";
+import hk from "./hk";
 
 inquirer
   .prompt([
@@ -33,4 +34,5 @@ inquirer
         }
       });
     if (cnList.length > 0) cn.run(cnList);
+    if (hkList.length > 0) hk.run(hkList);
   });
