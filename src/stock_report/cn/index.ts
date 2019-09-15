@@ -1,14 +1,21 @@
-const fs = require("fs");
-const _ = require("lodash");
-const { parse } = require("json2csv");
-const inquirer = require("inquirer");
-const {
+import fs from "fs";
+import _ from "lodash";
+import { parse } from "json2csv";
+import inquirer from "inquirer";
+import {
   formatJsonpData2csv,
   fetchStockReport,
   fetchPerformanceReport,
   buildDiy
-} = require("./utils");
-const { REPORT_TYPE, DATA_PATH, MOCK_PATH, ENCODING } = require("./constants");
+} from "./utils";
+import {
+  REPORT_TABLES,
+  DATA_PATH,
+  MOCK_PATH,
+  ENCODING,
+  ReportTableValue,
+  ReportType
+} from "./constants";
 
 if (!fs.existsSync(DATA_PATH)) {
   fs.mkdirSync(DATA_PATH);
@@ -29,7 +36,7 @@ inquirer
   ])
   .then(answers => {
     const { stockCodeList } = answers;
-    stockCodeList.split(",").forEach(stockCode => {
+    stockCodeList.split(",").forEach((stockCode: string) => {
       const promiseArr = [];
       // 业绩报表
       const performancePath = `${DATA_PATH}/${stockCode}_performance.csv`;
@@ -57,10 +64,11 @@ inquirer
       // }
 
       // 现金流量表 利润表 资产负债表
-      Object.keys(REPORT_TYPE).forEach(reportType => {
+      Object.keys(REPORT_TABLES).forEach(reportType => {
         const path = `${DATA_PATH}/${stockCode}_${reportType}.csv`;
         // if (!fs.existsSync(path)) {
-        const report = REPORT_TYPE[reportType];
+        const report: ReportTableValue =
+          REPORT_TABLES[reportType as ReportType];
         promiseArr.push(
           fetchStockReport({
             stockCode,

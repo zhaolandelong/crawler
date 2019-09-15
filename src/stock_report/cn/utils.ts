@@ -1,27 +1,60 @@
-const _ = require("lodash");
-const fs = require("fs");
-const axios = require("axios");
-const iconv = require("iconv-lite");
-const strRandom = require("string-random");
-const { parse } = require("json2csv");
-const { TOKEN, HEADER_MAP, MOCK_PATH, CURRENT_YEAR } = require("./constants");
+import _ from "lodash";
+import fs from "fs";
+import axios from "axios";
+import iconv from "iconv-lite";
+import strRandom from "string-random";
+import { parse } from "json2csv";
+import {
+  TOKEN,
+  HEADER_MAP,
+  MOCK_PATH,
+  CURRENT_YEAR,
+  ReportTableValue
+} from "./constants";
+import { StringKV } from "../../typing";
 
-module.exports = {
-  formatJsonpData2csv,
-  returnJsonpData,
-  fetchStockReport,
-  fetchPerformanceReport,
-  buildDiy
-};
-
-/**
- * @param { data:{}, font: { FontMapping:{ code: string; value: string }[] } } res
- */
-function formatJsonpData2csv(fontMap, rootData) {
-  let fields;
+export interface FontMap {
+  code: string;
+  value: number;
+}
+export interface RootData {
+  scode: string;
+  sname: string;
+  securitytype: string;
+  trademarket: string;
+  latestnoticedate: string;
+  reportdate: string;
+  publishname: string;
+  securitytypecode: string;
+  trademarketcode: string;
+  firstnoticedate: string;
+  basiceps: string;
+  cutbasiceps: string;
+  totaloperatereve: string;
+  ystz: string;
+  yshz: string;
+  parentnetprofit: string;
+  sjltz: string;
+  sjlhz: string;
+  roeweighted: string;
+  bps: string;
+  mgjyxjje: string;
+  xsmll: string;
+  assigndscrpt: string;
+  gxl: string;
+}
+export interface FormatJsonpData2csvRes {
+  fields: CsvFieldType[];
+  data: StringKV[];
+}
+export function formatJsonpData2csv(
+  fontMap: FontMap[],
+  rootData: RootData[]
+): FormatJsonpData2csvRes {
+  let fields: CsvFieldType[] = [];
   const data = rootData.map(da => {
-    const result = {};
-    if (!fields) {
+    const result: StringKV = {};
+    if (fields.length === 0) {
       fields = formatCsvFields(Object.keys(da));
     }
     Object.entries(da).forEach(([key, value]) => {
@@ -39,32 +72,38 @@ function formatJsonpData2csv(fontMap, rootData) {
   };
 }
 
-function formatCsvFields(fields) {
+export interface CsvFieldType {
+  label: string;
+  value: string;
+}
+export function formatCsvFields(fields: string[]): CsvFieldType[] {
   return fields.map(fKey => ({
     label: (HEADER_MAP[fKey] || "") + "_" + fKey,
     value: fKey
   }));
 }
 
-function returnJsonpData(varName, evalStr) {
-  eval(evalStr);
-  return eval(varName);
+export function returnJsonpData(varName: string, evalStr: string): any {
+  eval(evalStr.replace("var ", "global."));
+  return eval(`global.${varName}`);
 }
 
-function fetchStockReport(params) {
+export function fetchStockReport(
+  params: { stockCode: string } & ReportTableValue
+): Promise<RootData | null> {
   const { stockCode, ...rest } = params;
   if (!stockCode) {
     console.warn("[stockCode] is required in [fetchStockReport] !");
-    return;
+    return new Promise(rev => rev(null));
   }
   if (!params.type) {
     console.warn("[type] is required in [fetchStockReport] !");
-    return;
+    return new Promise(rev => rev(null));
   }
   const stockMockPath = `${MOCK_PATH}/${stockCode}_${params.type}.json`;
   if (fs.existsSync(stockMockPath)) {
     return new Promise((rev, rej) => {
-      fs.readFile(stockMockPath, (err, data) => {
+      fs.readFile(stockMockPath, "utf8", (err, data) => {
         if (err) rej(err);
         rev(JSON.parse(data));
       });
@@ -92,11 +131,16 @@ function fetchStockReport(params) {
     });
 }
 
-function fetchPerformanceReport(stockCode) {
+export function fetchPerformanceReport(
+  stockCode: string
+): Promise<{
+  fontMap: FontMap[];
+  data: RootData[];
+}> {
   const performanceMockPath = `${MOCK_PATH}/${stockCode}_performance.json`;
   if (fs.existsSync(performanceMockPath)) {
     return new Promise((rev, rej) => {
-      fs.readFile(performanceMockPath, (err, data) => {
+      fs.readFile(performanceMockPath, "utf8", (err, data) => {
         if (err) rej(err);
         rev(JSON.parse(data));
       });
@@ -108,8 +152,8 @@ function fetchPerformanceReport(stockCode) {
       responseType: "stream" //将数据转化为流返回
     }).then(res => {
       //此时的res.data 则为stream
-      let chunks = [];
-      res.data.on("data", chunk => {
+      let chunks: Buffer[] = [];
+      res.data.on("data", (chunk: Buffer) => {
         chunks.push(chunk);
       });
       res.data.on("end", () => {
@@ -132,19 +176,22 @@ function fetchPerformanceReport(stockCode) {
   });
 }
 
-function buildDiy(data) {
-  const totalData = _.merge(...data).filter(data => {
-    const reportDate = data.reportdate;
-    // current year all report
-    // or
-    // recent 3 years year-report
-    return (
-      reportDate > String(CURRENT_YEAR) ||
-      new RegExp(
-        `^(${CURRENT_YEAR - 1}|${CURRENT_YEAR - 2}|${CURRENT_YEAR - 3})-12-31`
-      ).test(reportDate)
-    );
-  });
+export function buildDiy(dataArr: StringKV[][]) {
+  const [mergeObj, ...mergeSource] = dataArr;
+  const totalData = _.merge(mergeObj, ...mergeSource).filter(
+    (data: StringKV) => {
+      const reportDate = data.reportdate;
+      // current year all report
+      // or
+      // recent 3 years year-report
+      return (
+        reportDate > String(CURRENT_YEAR) ||
+        new RegExp(
+          `^(${CURRENT_YEAR - 1}|${CURRENT_YEAR - 2}|${CURRENT_YEAR - 3})-12-31`
+        ).test(reportDate)
+      );
+    }
+  );
 
   const csv = parse(totalData, {
     fields: [

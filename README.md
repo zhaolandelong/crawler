@@ -1,9 +1,9 @@
 # Crawler
 
-## 1. stock report
+## 1. stock report v1.0
 Catch stock report data from http://quote.eastmoney.com/.
-- ### run the command below:
-If on Windows OS, double click the `data/_stock.bat` can also start the program.
+- ### Run the program
+If on Windows OS, double click the `data/_stock.bat` can also start the program. Or you can use the command below on any OS:
 ``` bash
 $ npm run stock
 ```
