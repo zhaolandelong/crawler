@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "stock": "node ./dist/stock_report/cn/index.js"
+    "stock": "node ./dist/stock_report/index.js"
   },
   "keywords": [],
   "author": "",

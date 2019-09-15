@@ -4,13 +4,8 @@ import axios from "axios";
 import iconv from "iconv-lite";
 import strRandom from "string-random";
 import { parse } from "json2csv";
-import {
-  TOKEN,
-  HEADER_MAP,
-  MOCK_PATH,
-  CURRENT_YEAR,
-  ReportTableValue
-} from "./constants";
+import { TOKEN, HEADER_MAP, ReportTableValue } from "./constants";
+import { MOCK_PATH, CURRENT_YEAR, ENCODING } from "../constants";
 import { StringKV } from "../../typing";
 
 export interface FontMap {
@@ -103,7 +98,7 @@ export function fetchStockReport(
   const stockMockPath = `${MOCK_PATH}/${stockCode}_${params.type}.json`;
   if (fs.existsSync(stockMockPath)) {
     return new Promise((rev, rej) => {
-      fs.readFile(stockMockPath, "utf8", (err, data) => {
+      fs.readFile(stockMockPath, ENCODING, (err, data) => {
         if (err) rej(err);
         rev(JSON.parse(data));
       });
@@ -140,7 +135,7 @@ export function fetchPerformanceReport(
   const performanceMockPath = `${MOCK_PATH}/${stockCode}_performance.json`;
   if (fs.existsSync(performanceMockPath)) {
     return new Promise((rev, rej) => {
-      fs.readFile(performanceMockPath, "utf8", (err, data) => {
+      fs.readFile(performanceMockPath, ENCODING, (err, data) => {
         if (err) rej(err);
         rev(JSON.parse(data));
       });

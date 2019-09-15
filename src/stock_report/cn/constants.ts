@@ -1,11 +1,4 @@
-import path from "path";
-
 export const TOKEN: string = "70f12f2f4f091e459a279469fe49eca5";
-
-export const DATA_PATH: string = path.resolve(__dirname, "../../../data");
-export const MOCK_PATH: string = path.resolve(__dirname, "../../../mock");
-export const CURRENT_YEAR: number = new Date().getFullYear();
-export const ENCODING: string = "utf8";
 
 export type ReportType = "cash" | "profit" | "balance"; // cash - 现金流量 profit - 利润 balance - 资产负债
 export interface ReportTableValue {
