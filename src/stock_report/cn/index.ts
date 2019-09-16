@@ -7,12 +7,8 @@ import {
   fetchPerformanceReport,
   buildDiy
 } from "./utils";
-import {
-  REPORT_TABLES,
-  ReportTableValue,
-  ReportTypeWithoutStandard
-} from "./constants";
-import { DATA_PATH, MOCK_PATH, ENCODING, ReportType } from "../constants";
+import { REPORT_TABLES, ReportTypeWithoutStandard } from "./constants";
+import { DATA_PATH, ENCODING } from "../constants";
 import { updateCache } from "../utils";
 
 if (!fs.existsSync(DATA_PATH)) {

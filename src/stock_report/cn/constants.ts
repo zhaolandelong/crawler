@@ -2,30 +2,24 @@ import { ReportType } from "../constants";
 
 export const TOKEN: string = "70f12f2f4f091e459a279469fe49eca5";
 
-export interface ReportTableValue {
-  label: string;
-  type: string;
-  rt: number;
-}
-
 export type ReportTypeWithoutStandard = Exclude<ReportType, "standard">;
 
 export const REPORT_TABLES: Record<
   ReportTypeWithoutStandard,
-  ReportTableValue
+  {
+    type: string;
+    rt: number;
+  }
 > = {
   cash: {
-    label: "现金流量表",
     type: "CWBB_XJLLB20",
     rt: 52137153
   },
   profit: {
-    label: "利润表",
     type: "CWBB_LRB20",
     rt: 52137490
   },
   balance: {
-    label: "资产负债表",
     type: "CWBB_ZCFZB20",
     rt: 52137497
   }

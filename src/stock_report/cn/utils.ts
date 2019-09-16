@@ -6,11 +6,10 @@ import { parse } from "json2csv";
 import {
   TOKEN,
   HEADER_MAP,
-  ReportTableValue,
   REPORT_TABLES,
   ReportTypeWithoutStandard
 } from "./constants";
-import { MOCK_PATH, CURRENT_YEAR, ENCODING, ReportType } from "../constants";
+import { CURRENT_YEAR } from "../constants";
 import { fetchHTML, getCache, updateCache } from "../utils";
 import { StringKV } from "../../typing";
 
@@ -155,8 +154,7 @@ export function fetchPerformanceReport(code: string): Promise<CnStandardRes> {
         updateCache({
           code,
           reportType: "standard",
-          data: JSON.stringify(result, null, 2),
-          force: false
+          data: JSON.stringify(result, null, 2)
         });
         return result;
       }
