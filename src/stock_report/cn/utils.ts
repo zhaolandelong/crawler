@@ -1,17 +1,8 @@
 import _ from "lodash";
 import fs from "fs";
-import axios from "axios";
-import strRandom from "string-random";
 import { parse } from "json2csv";
-import {
-  TOKEN,
-  HEADER_MAP,
-  REPORT_TABLES,
-  ReportTypeWithoutStandard
-} from "./constants";
 import { CURRENT_YEAR } from "../constants";
-import { fetchHTML, getCache, updateCache } from "../utils";
-import { StringKV } from "../../typing";
+import { StringKV, XlsxData } from "../../typing";
 
 export interface FontMap {
   code: string;
@@ -43,123 +34,50 @@ export interface RootData {
   assigndscrpt: string;
   gxl: string;
 }
-export interface FormatJsonpData2csvRes {
-  fields: CsvFieldType[];
-  data: StringKV[];
-}
-export function formatJsonpData2csv(
+
+export function decodeData(
   fontMap: FontMap[],
-  rootData: RootData[]
-): FormatJsonpData2csvRes {
-  let fields: CsvFieldType[] = [];
-  const data = rootData.map(da => {
-    const result: StringKV = {};
-    if (fields.length === 0) {
-      fields = formatCsvFields(Object.keys(da));
-    }
+  rootData: StringKV[]
+): StringKV[] {
+  return rootData.map(da => {
+    const result = {} as StringKV;
     Object.entries(da).forEach(([key, value]) => {
       let codeVal = value;
       fontMap.forEach(fm => {
-        codeVal = codeVal.replace(new RegExp(fm.code, "g"), fm.value);
+        codeVal = codeVal.replace(new RegExp(fm.code, "g"), String(fm.value));
       });
-      result[key] = codeVal;
+      result[key as keyof StringKV] = codeVal;
     });
     return result;
   });
-  return {
-    fields,
-    data
-  };
 }
 
-export interface CsvFieldType {
-  label: string;
-  value: string;
-}
-export function formatCsvFields(fields: string[]): CsvFieldType[] {
-  return fields.map(fKey => ({
-    label: (HEADER_MAP[fKey] || "") + "_" + fKey,
-    value: fKey
-  }));
-}
-
-export function returnJsonpData(varName: string, evalStr: string): any {
-  eval(evalStr.replace("var ", "global."));
-  return eval(`global.${varName}`);
-}
-
-export function fetchStockReport(params: {
-  code: string;
-  reportType: ReportTypeWithoutStandard;
-}): Promise<RootData | null> {
-  const { code, reportType } = params;
-  if (!code) {
-    console.warn("[code] is required in [fetchStockReport] !");
-    return new Promise(rev => rev(null));
-  }
-  if (!reportType) {
-    console.warn("[type] is required in [fetchStockReport] !");
-    return new Promise(rev => rev(null));
-  }
-  return getCache({
-    code,
-    reportType
-  }).then(data => {
-    if (data) return data as RootData;
-    const jsonp = strRandom(6, { numbers: false });
-    const { type, rt } = REPORT_TABLES[reportType];
-    const baseParams = {
-      filter: `(scode=${code})`, // 股票代码
-      js: `var ${jsonp}={pages:(tp),data: (x),font:(font)}`, // jsonp 数据结构
-      p: "1", // 页码
-      ps: "50", // pageSize
-      sr: "-1",
-      st: "reportdate",
-      token: TOKEN,
-      type,
-      rt
-    };
-    return axios
-      .get("http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get", {
-        params: _.merge(baseParams, params)
-      })
-      .then(res => {
-        const rootData = returnJsonpData(jsonp, res.data);
-        return rootData;
-      });
+export function formatObj2ArrByHeader(
+  data: StringKV[],
+  headers: StringKV
+): XlsxData[] {
+  const headerKeys = Object.keys(headers);
+  const xlsxData = data.map(da => {
+    return headerKeys.reduce((accumulator: XlsxData, current) => {
+      accumulator.push(da[current]);
+      return accumulator;
+    }, []);
   });
+  xlsxData.unshift(Object.values(headers));
+  return xlsxData;
 }
 
-type CnStandardRes = {
-  fontMap: FontMap[];
-  data: RootData[];
-};
-export function fetchPerformanceReport(code: string): Promise<CnStandardRes> {
-  return getCache({
-    code,
-    reportType: "standard"
-  }).then(standardData => {
-    if (standardData) return standardData as CnStandardRes;
-    return fetchHTML(`http://data.eastmoney.com/bbsj/yjbb/${code}.html`).then(
-      htmlStr => {
-        const fontMapMath = htmlStr.match(/"FontMapping":(\[.+"value":0}])/);
-        const fontMap = JSON.parse(_.get(fontMapMath, "[1]", "[]"));
-
-        const dataMatch = htmlStr.match(/data: (\[.+\]),font:/);
-        const data = JSON.parse(_.get(dataMatch, "[1]", "[]"));
-        const result = {
-          fontMap,
-          data
-        };
-        updateCache({
-          code,
-          reportType: "standard",
-          data: JSON.stringify(result, null, 2)
-        });
-        return result;
-      }
-    );
-  });
+export function dataFilterCallback(
+  reportData: string,
+  from: number,
+  to: number
+): boolean {
+  return (
+    reportData > String(to) ||
+    new RegExp(`^(${_.times(to - from, i => from + i).join("|")})-12-31`).test(
+      reportData
+    )
+  );
 }
 
 export function buildDiy(dataArr: StringKV[][]) {

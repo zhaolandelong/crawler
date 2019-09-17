@@ -60,7 +60,7 @@ const CASH_HEADERS = [
     "购置固定资产款项",
     "币种"
 ];
-const STATUS_HEADERS = [
+const PROFIT_HEADERS = [
     "报告期",
     "报表类型",
     "营业额",
@@ -103,6 +103,6 @@ exports.HK_REPORT_TYPE_MAP = {
     profit: {
         type: "getFinanceStatusForjs",
         query: "financeStatus",
-        headers: STATUS_HEADERS
+        headers: PROFIT_HEADERS
     }
 };

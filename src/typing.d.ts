@@ -1,3 +1,2 @@
-export type StringKV = {
-  [key in string]: string;
-};
+export type StringKV = Record<string, string>;
+export type XlsxData = (string | null | number)[];

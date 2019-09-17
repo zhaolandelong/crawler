@@ -15,6 +15,7 @@ exports.default = {
                         code,
                         reportType
                     }).then(res => {
+                        // 加头
                         res.unshift(constants_1.HK_REPORT_TYPE_MAP[reportType].headers);
                         // 只要 DEAL_YEAR 后的数据
                         return res.filter(row => typeof row[0] === "string" && row[0] > String(constants_2.DEAL_YEAR));

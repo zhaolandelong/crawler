@@ -1,73 +1,49 @@
-import fs from "fs";
 import _ from "lodash";
-import { parse } from "json2csv";
-import {
-  formatJsonpData2csv,
-  fetchStockReport,
-  fetchPerformanceReport,
-  buildDiy
-} from "./utils";
-import { REPORT_TABLES, ReportTypeWithoutStandard } from "./constants";
-import { DATA_PATH, ENCODING } from "../constants";
-import { updateCache } from "../utils";
-
-if (!fs.existsSync(DATA_PATH)) {
-  fs.mkdirSync(DATA_PATH);
-}
+import { CN_REPORT_TYPE_MAP } from "./constants";
+import { fetchStandard, fetchOtherReport } from "./services";
+import { ReportType, DEAL_YEAR, CURRENT_YEAR } from "../constants";
+import { StringKV, XlsxData } from "../../typing";
+import { exportXlsx } from "../utils";
+import { formatObj2ArrByHeader, dataFilterCallback } from "./utils";
 
 export default {
   run(codeArr: string[]) {
     codeArr.forEach(code => {
-      const promiseArr = [];
-      // 业绩报表
-      const performancePath = `${DATA_PATH}/${code}_performance.csv`;
-      // if (!fs.existsSync(performancePath)) {
-      promiseArr.push(
-        fetchPerformanceReport(code).then(res => {
-          const { fields, data } = formatJsonpData2csv(res.fontMap, res.data);
-          const csv = parse(data, { fields });
-          console.log(`${performancePath} download finish`);
-          fs.writeFile(performancePath, csv, ENCODING, err => {
-            if (err) console.warn(err);
-          });
-          return data;
-        })
-      );
-      // }
-
-      // 现金流量表 利润表 资产负债表
-      Object.keys(REPORT_TABLES).forEach(key => {
-        const reportType = key as ReportTypeWithoutStandard;
-        const path = `${DATA_PATH}/${code}_${key}.csv`;
-        promiseArr.push(
-          fetchStockReport({
-            code,
-            reportType
-          }).then(res => {
-            updateCache({
+      const promiseArr: Promise<StringKV[]>[] = [];
+      Object.keys(CN_REPORT_TYPE_MAP).forEach(key => {
+        const reportType = key as ReportType;
+        if (reportType === "standard") {
+          promiseArr.push(
+            fetchStandard(code).then(res =>
+              res.filter(row =>
+                dataFilterCallback(row.reportdate, DEAL_YEAR, CURRENT_YEAR)
+              )
+            )
+          );
+        } else {
+          promiseArr.push(
+            fetchOtherReport({
               code,
-              reportType,
-              data: JSON.stringify(res, null, 2)
-            });
-            const { fields, data } = formatJsonpData2csv(
-              _.get(res, "font.FontMapping", []),
-              _.get(res, "data", [])
-            );
-            console.log(`${path} download finish`);
-            const csv = parse(data, { fields });
-            fs.writeFile(path, csv, ENCODING, err => {
-              if (err) console.warn(err);
-            });
-            return data;
-          })
-        );
-        // }
+              reportType
+            }).then(res =>
+              res.filter(row =>
+                dataFilterCallback(row.reportdate, DEAL_YEAR, CURRENT_YEAR)
+              )
+            )
+          );
+        }
       });
-      if (promiseArr.length) {
-        Promise.all(promiseArr).then(resArr => {
-          buildDiy(resArr);
+      Promise.all(promiseArr).then(resArr => {
+        const dataMap = {} as Record<ReportType, XlsxData[]>;
+        Object.keys(CN_REPORT_TYPE_MAP).forEach((key, index) => {
+          const reportType = key as ReportType;
+          dataMap[reportType] = formatObj2ArrByHeader(
+            resArr[index],
+            CN_REPORT_TYPE_MAP[reportType].headers
+          );
         });
-      }
+        exportXlsx(code, dataMap);
+      });
     });
   }
 };

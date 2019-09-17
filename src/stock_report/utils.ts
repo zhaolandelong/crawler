@@ -4,6 +4,7 @@ import fs from "fs";
 import _ from "lodash";
 import xlsx from "xlsx";
 import { ReportType, CACHE_PATH, DATA_PATH } from "./constants";
+import { XlsxData } from "../typing";
 
 export function fetchHTML(
   url: string,
@@ -78,10 +79,9 @@ export function getCache(options: CacheOpt): Promise<unknown> {
   });
 }
 
-export type XlsxData = (string | null | number)[][];
 export function exportXlsx(
   code: string,
-  dataMap: Record<Partial<ReportType>, XlsxData>
+  dataMap: Record<Partial<ReportType>, XlsxData[]>
 ): void {
   const wb = xlsx.utils.book_new();
   Object.keys(dataMap).forEach(key => {

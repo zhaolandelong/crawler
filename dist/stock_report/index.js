@@ -4,8 +4,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer_1 = __importDefault(require("inquirer"));
+const fs_1 = __importDefault(require("fs"));
+const constants_1 = require("./constants");
 const cn_1 = __importDefault(require("./cn"));
 const hk_1 = __importDefault(require("./hk"));
+if (!fs_1.default.existsSync(constants_1.DATA_PATH)) {
+    fs_1.default.mkdirSync(constants_1.DATA_PATH);
+}
+if (!fs_1.default.existsSync(constants_1.CACHE_PATH)) {
+    fs_1.default.mkdirSync(constants_1.CACHE_PATH);
+}
 inquirer_1.default
     .prompt([
     {

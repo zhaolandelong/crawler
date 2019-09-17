@@ -1,12 +1,7 @@
-import {
-  fetchJsonp,
-  XlsxData,
-  updateCache,
-  checkCache,
-  getCache
-} from "../utils";
+import { fetchJsonp, updateCache, checkCache, getCache } from "../utils";
 import { HK_REPORT_TYPE_MAP } from "./constants";
 import { ReportType, CURRENT_YEAR } from "../constants";
+import { XlsxData } from "../../typing";
 
 export type HkReportPeriod = "all" | "zero" | "1" | "2" | "3"; // all - 全部 zero - 年报 1 - 中报 2 - 一季报 3 - 三季报
 interface HkDataParams {
@@ -14,7 +9,7 @@ interface HkDataParams {
   reportType: ReportType;
   period?: HkReportPeriod;
 }
-export function fetchDataByPeriod(params: HkDataParams): Promise<XlsxData> {
+export function fetchDataByPeriod(params: HkDataParams): Promise<XlsxData[]> {
   const { code, reportType, period = "zero" } = params;
   const { type, query } = HK_REPORT_TYPE_MAP[reportType];
   return fetchJsonp(
@@ -27,10 +22,10 @@ export function fetchDataByPeriod(params: HkDataParams): Promise<XlsxData> {
   );
 }
 
-export function fetchData(params: HkDataParams): Promise<XlsxData> {
+export function fetchData(params: HkDataParams): Promise<XlsxData[]> {
   const { code, reportType } = params;
   if (checkCache({ code, reportType })) {
-    return getCache({ code, reportType }) as Promise<XlsxData>;
+    return getCache({ code, reportType }) as Promise<XlsxData[]>;
   }
   return Promise.all([
     fetchDataByPeriod({

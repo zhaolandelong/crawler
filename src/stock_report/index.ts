@@ -1,6 +1,16 @@
 import inquirer from "inquirer";
+import fs from "fs";
+import { DATA_PATH, CACHE_PATH } from "./constants";
 import cn from "./cn";
 import hk from "./hk";
+
+if (!fs.existsSync(DATA_PATH)) {
+  fs.mkdirSync(DATA_PATH);
+}
+
+if (!fs.existsSync(CACHE_PATH)) {
+  fs.mkdirSync(CACHE_PATH);
+}
 
 inquirer
   .prompt([
