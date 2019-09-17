@@ -3,7 +3,7 @@ import iconv from "iconv-lite";
 import fs from "fs";
 import _ from "lodash";
 import xlsx from "xlsx";
-import { ReportType, CACHE_PATH, XlsxData, XlsxDataMap } from "./constants";
+import { ReportType, CACHE_PATH, XlsxDataMap } from "./constants";
 
 export function fetchHTML(
   url: string,

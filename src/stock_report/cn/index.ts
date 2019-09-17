@@ -9,7 +9,6 @@ import {
   XlsxDataMap,
   XlsxData
 } from "../constants";
-import { StringKV } from "../../typing";
 import { exportXlsx } from "../utils";
 import { formatObj2ArrByHeader, dataFilterCallback } from "./utils";
 

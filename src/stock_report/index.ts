@@ -1,5 +1,6 @@
 import inquirer from "inquirer";
 import fs from "fs";
+import history from "./history.json";
 import { DATA_PATH, CACHE_PATH } from "./constants";
 import cn from "./cn";
 import hk from "./hk";
@@ -37,12 +38,29 @@ inquirer
       .forEach((stockCode: string) => {
         if (/\d{6}/.test(stockCode)) {
           cnList.push(stockCode);
+          if (history.cn.indexOf(stockCode) === -1) {
+            history.cn.push(stockCode);
+          }
         } else if (/\d{5}/.test(stockCode)) {
           hkList.push(stockCode);
+          if (history.hk.indexOf(stockCode) === -1) {
+            history.hk.push(stockCode);
+          }
         } else if (/^[A-Za-z]+$/.test(stockCode)) {
           usList.push(stockCode);
+          if (history.us.indexOf(stockCode) === -1) {
+            history.us.push(stockCode);
+          }
         }
       });
+    fs.writeFile(
+      "./history.json",
+      JSON.stringify(history, null, 2),
+      "utf8",
+      err => {
+        if (err) console.warn(err);
+      }
+    );
     if (cnList.length > 0) cn.run(cnList);
     if (hkList.length > 0) hk.run(hkList);
   });
