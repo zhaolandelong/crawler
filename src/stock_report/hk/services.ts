@@ -1,7 +1,6 @@
 import { fetchJsonp, updateCache, checkCache, getCache } from "../utils";
 import { HK_REPORT_TYPE_MAP } from "./constants";
-import { ReportType, CURRENT_YEAR } from "../constants";
-import { XlsxData } from "../../typing";
+import { ReportType, CURRENT_YEAR, XlsxData } from "../constants";
 
 export type HkReportPeriod = "all" | "zero" | "1" | "2" | "3"; // all - 全部 zero - 年报 1 - 中报 2 - 一季报 3 - 三季报
 interface HkDataParams {
@@ -39,13 +38,13 @@ export function fetchData(params: HkDataParams): Promise<XlsxData[]> {
       period: "zero"
     })
   ]).then(dataArr => {
-    const [dataAll, dataYear] = dataArr;
+    const [dataAll, dataByYear] = dataArr;
     const res = [
       ...dataAll.filter(
         // 只要当年季报数据
         da => typeof da[0] === "string" && da[0] > String(CURRENT_YEAR)
       ),
-      ...dataYear
+      ...dataByYear
     ];
     updateCache({
       code,

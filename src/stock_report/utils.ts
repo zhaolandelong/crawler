@@ -3,8 +3,7 @@ import iconv from "iconv-lite";
 import fs from "fs";
 import _ from "lodash";
 import xlsx from "xlsx";
-import { ReportType, CACHE_PATH, DATA_PATH } from "./constants";
-import { XlsxData } from "../typing";
+import { ReportType, CACHE_PATH, XlsxData, XlsxDataMap } from "./constants";
 
 export function fetchHTML(
   url: string,
@@ -79,10 +78,7 @@ export function getCache(options: CacheOpt): Promise<unknown> {
   });
 }
 
-export function exportXlsx(
-  code: string,
-  dataMap: Record<Partial<ReportType>, XlsxData[]>
-): void {
+export function exportXlsx(path: string, dataMap: XlsxDataMap): void {
   const wb = xlsx.utils.book_new();
   Object.keys(dataMap).forEach(key => {
     const reportType = key as Partial<ReportType>;
@@ -92,5 +88,5 @@ export function exportXlsx(
       reportType
     );
   });
-  xlsx.writeFile(wb, `${DATA_PATH}/${code}.xlsx`);
+  xlsx.writeFile(wb, path);
 }

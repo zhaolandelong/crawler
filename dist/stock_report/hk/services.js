@@ -29,12 +29,12 @@ function fetchData(params) {
             period: "zero"
         })
     ]).then(dataArr => {
-        const [dataAll, dataYear] = dataArr;
+        const [dataAll, dataByYear] = dataArr;
         const res = [
             ...dataAll.filter(
             // 只要当年季报数据
             da => typeof da[0] === "string" && da[0] > String(constants_2.CURRENT_YEAR)),
-            ...dataYear
+            ...dataByYear
         ];
         utils_1.updateCache({
             code,

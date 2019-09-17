@@ -1,8 +1,6 @@
 import _ from "lodash";
-import fs from "fs";
-import { parse } from "json2csv";
-import { CURRENT_YEAR } from "../constants";
-import { StringKV, XlsxData } from "../../typing";
+import { XlsxData } from "../constants";
+import { StringKV } from "../../typing";
 
 export interface FontMap {
   code: string;
@@ -78,90 +76,4 @@ export function dataFilterCallback(
       reportData
     )
   );
-}
-
-export function buildDiy(dataArr: StringKV[][]) {
-  const [mergeObj, ...mergeSource] = dataArr;
-  const totalData = _.merge(mergeObj, ...mergeSource).filter(
-    (data: StringKV) => {
-      const reportDate = data.reportdate;
-      // current year all report
-      // or
-      // recent 3 years year-report
-      return (
-        reportDate > String(CURRENT_YEAR) ||
-        new RegExp(
-          `^(${CURRENT_YEAR - 1}|${CURRENT_YEAR - 2}|${CURRENT_YEAR - 3})-12-31`
-        ).test(reportDate)
-      );
-    }
-  );
-
-  const csv = parse(totalData, {
-    fields: [
-      {
-        label: "代码",
-        value: "scode"
-      },
-      {
-        label: "名称",
-        value: "sname"
-      },
-      {
-        label: "报告期",
-        value: "reportdate"
-      },
-      {
-        label: "行业",
-        value: "publishname"
-      },
-      {
-        label: "营业总收入(元)",
-        value: "totaloperatereve"
-      },
-      {
-        label: "同比增长(%)",
-        value: "ystz"
-      },
-      {
-        label: "季度环比增长(%)",
-        value: "yshz"
-      },
-      {
-        label: "销售商品、提供劳务收到的现金",
-        value: "salegoodsservicerec"
-      },
-      {
-        label: "销售商品、提供劳务收到的现金占比",
-        value: "salegoodsservicerec_zb"
-      },
-      {
-        label: "净利润(元)",
-        value: "parentnetprofit"
-      },
-      {
-        label: "净利润同比(%)",
-        value: "sjltz"
-      },
-      {
-        label: "季度环比增长(%)",
-        value: "sjlhz"
-      },
-      {
-        label: "销售毛利率(%)",
-        value: "xsmll"
-      },
-      {
-        label: "总负债(元)",
-        value: "sumliab"
-      },
-      {
-        label: "总负债同比(%)",
-        value: "tdetz"
-      }
-    ]
-  });
-  fs.appendFile(`./data/diy_report.csv`, csv, "utf-8", err => {
-    err && console.log(err);
-  });
 }

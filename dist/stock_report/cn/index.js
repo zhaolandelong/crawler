@@ -27,7 +27,7 @@ exports.default = {
                     const reportType = key;
                     dataMap[reportType] = utils_2.formatObj2ArrByHeader(resArr[index], constants_1.CN_REPORT_TYPE_MAP[reportType].headers);
                 });
-                utils_1.exportXlsx(code, dataMap);
+                utils_1.exportXlsx(`${constants_2.DATA_PATH}/${code}.xlsx`, dataMap);
             });
         });
     }

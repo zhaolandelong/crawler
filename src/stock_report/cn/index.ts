@@ -1,8 +1,14 @@
 import _ from "lodash";
 import { CN_REPORT_TYPE_MAP } from "./constants";
 import { fetchStandard, fetchOtherReport } from "./services";
-import { ReportType, DEAL_YEAR, CURRENT_YEAR } from "../constants";
-import { StringKV, XlsxData } from "../../typing";
+import {
+  ReportType,
+  DEAL_YEAR,
+  CURRENT_YEAR,
+  DATA_PATH,
+  XlsxDataMap
+} from "../constants";
+import { StringKV } from "../../typing";
 import { exportXlsx } from "../utils";
 import { formatObj2ArrByHeader, dataFilterCallback } from "./utils";
 
@@ -34,7 +40,7 @@ export default {
         }
       });
       Promise.all(promiseArr).then(resArr => {
-        const dataMap = {} as Record<ReportType, XlsxData[]>;
+        const dataMap = {} as XlsxDataMap;
         Object.keys(CN_REPORT_TYPE_MAP).forEach((key, index) => {
           const reportType = key as ReportType;
           dataMap[reportType] = formatObj2ArrByHeader(
@@ -42,7 +48,7 @@ export default {
             CN_REPORT_TYPE_MAP[reportType].headers
           );
         });
-        exportXlsx(code, dataMap);
+        exportXlsx(`${DATA_PATH}/${code}.xlsx`, dataMap);
       });
     });
   }
