@@ -28,12 +28,7 @@ exports.default = {
                             code,
                             reportType
                         }).then(res => {
-                            const result = res
-                                // .filter(
-                                //   row =>
-                                //     typeof row[0] === "string" && row[0] > String(DEAL_YEAR)
-                                // )
-                                .map(row => {
+                            const result = res.map(row => {
                                 row.unshift(code);
                                 return row;
                             });

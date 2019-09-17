@@ -26,7 +26,7 @@ function formatObj2ArrByHeader(data, headers) {
             return accumulator;
         }, []);
     });
-    xlsxData.unshift(Object.values(headers));
+    // xlsxData.unshift(Object.values(headers));
     return xlsxData;
 }
 exports.formatObj2ArrByHeader = formatObj2ArrByHeader;
