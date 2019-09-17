@@ -1,9 +1,11 @@
 import inquirer from "inquirer";
 import fs from "fs";
-import history from "./history.json";
+import path from "path";
 import { DATA_PATH, CACHE_PATH } from "./constants";
 import cn from "./cn";
 import hk from "./hk";
+
+const history = require(path.resolve(DATA_PATH, "./history.json"));
 
 if (!fs.existsSync(DATA_PATH)) {
   fs.mkdirSync(DATA_PATH);
@@ -54,7 +56,7 @@ inquirer
         }
       });
     fs.writeFile(
-      "./history.json",
+      path.resolve(DATA_PATH, "./history.json"),
       JSON.stringify(history, null, 2),
       "utf8",
       err => {

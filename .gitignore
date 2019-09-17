@@ -1,10 +1,9 @@
 .DS_Store
 .vscode
 node_modules/
-data/*
+data/*.xlsx
 mock/
 cache/
-!data/_stock.bat
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
