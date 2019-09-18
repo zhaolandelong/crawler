@@ -1,6 +1,7 @@
 import { ReportType } from "../constants";
 
 const STANDARD_HEADERS: string[] = [
+  "股票代码",
   "开始日期",
   "截止日期",
   "公告日期",
@@ -19,6 +20,7 @@ const STANDARD_HEADERS: string[] = [
   "币种"
 ];
 const BALANCE_HEADERS: string[] = [
+  "股票代码",
   "报告期",
   "报表类型",
   "非流动资产",
@@ -48,6 +50,7 @@ const BALANCE_HEADERS: string[] = [
   "币种"
 ];
 const CASH_HEADERS: string[] = [
+  "股票代码",
   "报告期",
   "报表类型",
   "经营业务所得之现金流入净额",
@@ -61,6 +64,7 @@ const CASH_HEADERS: string[] = [
   "币种"
 ];
 const PROFIT_HEADERS: string[] = [
+  "股票代码",
   "报告期",
   "报表类型",
   "营业额",

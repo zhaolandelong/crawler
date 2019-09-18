@@ -55,3 +55,4 @@ function fetchOtherReport(params) {
     });
 }
 exports.fetchOtherReport = fetchOtherReport;
+//# sourceMappingURL=services.js.map

@@ -35,3 +35,4 @@ function dataFilterCallback(reportData, from, to) {
         new RegExp(`^(${lodash_1.default.times(to - from, i => from + i).join("|")})-12-31`).test(reportData));
 }
 exports.dataFilterCallback = dataFilterCallback;
+//# sourceMappingURL=utils.js.map

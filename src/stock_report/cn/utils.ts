@@ -6,39 +6,13 @@ export interface FontMap {
   code: string;
   value: number;
 }
-export interface RootData {
-  scode: string;
-  sname: string;
-  securitytype: string;
-  trademarket: string;
-  latestnoticedate: string;
-  reportdate: string;
-  publishname: string;
-  securitytypecode: string;
-  trademarketcode: string;
-  firstnoticedate: string;
-  basiceps: string;
-  cutbasiceps: string;
-  totaloperatereve: string;
-  ystz: string;
-  yshz: string;
-  parentnetprofit: string;
-  sjltz: string;
-  sjlhz: string;
-  roeweighted: string;
-  bps: string;
-  mgjyxjje: string;
-  xsmll: string;
-  assigndscrpt: string;
-  gxl: string;
-}
 
 export function decodeData(
   fontMap: FontMap[],
   rootData: StringKV[]
 ): StringKV[] {
   return rootData.map(da => {
-    const result = {} as StringKV;
+    const result: StringKV = {};
     Object.entries(da).forEach(([key, value]) => {
       let codeVal = value;
       fontMap.forEach(fm => {

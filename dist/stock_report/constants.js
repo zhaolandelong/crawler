@@ -9,3 +9,4 @@ exports.MOCK_PATH = path_1.default.resolve(__dirname, "../../mock");
 exports.CACHE_PATH = path_1.default.resolve(__dirname, "../../cache");
 exports.CURRENT_YEAR = new Date().getFullYear();
 exports.DEAL_YEAR = exports.CURRENT_YEAR - 4;
+//# sourceMappingURL=constants.js.map

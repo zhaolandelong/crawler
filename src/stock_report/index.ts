@@ -4,6 +4,7 @@ import path from "path";
 import { DATA_PATH, CACHE_PATH } from "./constants";
 import cn from "./cn";
 import hk from "./hk";
+import us from "./us";
 
 const history = require(path.resolve(DATA_PATH, "./history.json"));
 
@@ -38,17 +39,17 @@ inquirer
       .replace(/\s+/g, "")
       .split(",")
       .forEach((stockCode: string) => {
-        if (/\d{6}/.test(stockCode)) {
+        if (cn.checkStock(stockCode)) {
           cnList.push(stockCode);
           if (history.cn.indexOf(stockCode) === -1) {
             history.cn.push(stockCode);
           }
-        } else if (/\d{5}/.test(stockCode)) {
+        } else if (hk.checkStock(stockCode)) {
           hkList.push(stockCode);
           if (history.hk.indexOf(stockCode) === -1) {
             history.hk.push(stockCode);
           }
-        } else if (/^[A-Za-z]+$/.test(stockCode)) {
+        } else if (us.checkStock(stockCode)) {
           usList.push(stockCode);
           if (history.us.indexOf(stockCode) === -1) {
             history.us.push(stockCode);
@@ -65,4 +66,5 @@ inquirer
     );
     if (cnList.length > 0) cn.run(cnList);
     if (hkList.length > 0) hk.run(hkList);
+    if (usList.length > 0) us.run(usList);
   });

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const STANDARD_HEADERS = [
+    "股票代码",
     "开始日期",
     "截止日期",
     "公告日期",
@@ -19,6 +20,7 @@ const STANDARD_HEADERS = [
     "币种"
 ];
 const BALANCE_HEADERS = [
+    "股票代码",
     "报告期",
     "报表类型",
     "非流动资产",
@@ -48,6 +50,7 @@ const BALANCE_HEADERS = [
     "币种"
 ];
 const CASH_HEADERS = [
+    "股票代码",
     "报告期",
     "报表类型",
     "经营业务所得之现金流入净额",
@@ -61,6 +64,7 @@ const CASH_HEADERS = [
     "币种"
 ];
 const PROFIT_HEADERS = [
+    "股票代码",
     "报告期",
     "报表类型",
     "营业额",
@@ -106,3 +110,4 @@ exports.HK_REPORT_TYPE_MAP = {
         headers: PROFIT_HEADERS
     }
 };
+//# sourceMappingURL=constants.js.map

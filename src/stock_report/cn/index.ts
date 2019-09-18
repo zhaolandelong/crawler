@@ -9,17 +9,11 @@ import {
   XlsxDataMap,
   XlsxData
 } from "../constants";
-import { exportXlsx } from "../utils";
+import { exportXlsx, mergeDataByStock } from "../utils";
 import { formatObj2ArrByHeader, dataFilterCallback } from "./utils";
 
 export default {
   run(codeArr: string[]) {
-    const allData: XlsxDataMap = {
-      standard: [],
-      cash: [],
-      profit: [],
-      balance: []
-    };
     const allPromise: Promise<XlsxDataMap>[] = [];
     codeArr.forEach(code => {
       allPromise.push(
@@ -85,19 +79,14 @@ export default {
       );
     });
     Promise.all(allPromise).then(allDataArr => {
-      allDataArr.forEach(allDa => {
-        _.mergeWith(
-          allData,
-          allDa,
-          (objValue: XlsxData[], srcValue: XlsxData[]) =>
-            objValue.concat(srcValue)
-        );
-      });
+      const allData = mergeDataByStock(allDataArr);
       // 加头
       Object.entries(allData).forEach(([key, value]) => {
-        value.unshift(
-          Object.values(CN_REPORT_TYPE_MAP[key as ReportType].headers)
-        );
+        const headers = _.get(CN_REPORT_TYPE_MAP, `${key}.headers`);
+        if (value && headers) {
+          value.unshift(Object.values(headers));
+        }
+
         return value;
       });
       exportXlsx(
@@ -105,5 +94,8 @@ export default {
         allData
       );
     });
+  },
+  checkStock(code: string): boolean {
+    return /\d{6}/.test(code);
   }
 };

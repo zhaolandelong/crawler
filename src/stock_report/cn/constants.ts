@@ -3,8 +3,6 @@ import { StringKV } from "../../typing";
 
 export const TOKEN: string = "70f12f2f4f091e459a279469fe49eca5";
 
-export type ReportTypeWithoutStandard = Exclude<ReportType, "standard">;
-
 const STANDARD_HEADERS: StringKV = {
   scode: "股票代码",
   sname: "股票名称",

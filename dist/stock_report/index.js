@@ -9,6 +9,7 @@ const path_1 = __importDefault(require("path"));
 const constants_1 = require("./constants");
 const cn_1 = __importDefault(require("./cn"));
 const hk_1 = __importDefault(require("./hk"));
+const us_1 = __importDefault(require("./us"));
 const history = require(path_1.default.resolve(constants_1.DATA_PATH, "./history.json"));
 if (!fs_1.default.existsSync(constants_1.DATA_PATH)) {
     fs_1.default.mkdirSync(constants_1.DATA_PATH);
@@ -39,19 +40,19 @@ inquirer_1.default
         .replace(/\s+/g, "")
         .split(",")
         .forEach((stockCode) => {
-        if (/\d{6}/.test(stockCode)) {
+        if (cn_1.default.checkStock(stockCode)) {
             cnList.push(stockCode);
             if (history.cn.indexOf(stockCode) === -1) {
                 history.cn.push(stockCode);
             }
         }
-        else if (/\d{5}/.test(stockCode)) {
+        else if (hk_1.default.checkStock(stockCode)) {
             hkList.push(stockCode);
             if (history.hk.indexOf(stockCode) === -1) {
                 history.hk.push(stockCode);
             }
         }
-        else if (/^[A-Za-z]+$/.test(stockCode)) {
+        else if (us_1.default.checkStock(stockCode)) {
             usList.push(stockCode);
             if (history.us.indexOf(stockCode) === -1) {
                 history.us.push(stockCode);
@@ -66,4 +67,7 @@ inquirer_1.default
         cn_1.default.run(cnList);
     if (hkList.length > 0)
         hk_1.default.run(hkList);
+    if (usList.length > 0)
+        us_1.default.run(usList);
 });
+//# sourceMappingURL=index.js.map

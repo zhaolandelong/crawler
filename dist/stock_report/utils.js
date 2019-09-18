@@ -74,8 +74,30 @@ function exportXlsx(path, dataMap) {
     const wb = xlsx_1.default.utils.book_new();
     Object.keys(dataMap).forEach(key => {
         const reportType = key;
-        xlsx_1.default.utils.book_append_sheet(wb, xlsx_1.default.utils.aoa_to_sheet(dataMap[reportType]), reportType);
+        if (dataMap[reportType]) {
+            xlsx_1.default.utils.book_append_sheet(wb, xlsx_1.default.utils.aoa_to_sheet(dataMap[reportType]), reportType);
+        }
     });
     xlsx_1.default.writeFile(wb, path);
 }
 exports.exportXlsx = exportXlsx;
+function mergeDataByStock(dataArr, filterCallback, initData) {
+    const allData = initData || {
+        standard: [],
+        cash: [],
+        profit: [],
+        balance: []
+    };
+    dataArr.forEach(allDa => {
+        lodash_1.default.mergeWith(allData, allDa, (objValue, srcValue) => {
+            if (typeof filterCallback === "function") {
+                const filterRes = srcValue.filter(filterCallback);
+                return objValue.concat(filterRes);
+            }
+            return objValue.concat(srcValue);
+        });
+    });
+    return allData;
+}
+exports.mergeDataByStock = mergeDataByStock;
+//# sourceMappingURL=utils.js.map

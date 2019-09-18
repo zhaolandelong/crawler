@@ -11,12 +11,6 @@ const utils_1 = require("../utils");
 const utils_2 = require("./utils");
 exports.default = {
     run(codeArr) {
-        const allData = {
-            standard: [],
-            cash: [],
-            profit: [],
-            balance: []
-        };
         const allPromise = [];
         codeArr.forEach(code => {
             allPromise.push(new Promise((rev, rej) => {
@@ -59,15 +53,20 @@ exports.default = {
             }));
         });
         Promise.all(allPromise).then(allDataArr => {
-            allDataArr.forEach(allDa => {
-                lodash_1.default.mergeWith(allData, allDa, (objValue, srcValue) => objValue.concat(srcValue));
-            });
+            const allData = utils_1.mergeDataByStock(allDataArr);
             // 加头
             Object.entries(allData).forEach(([key, value]) => {
-                value.unshift(Object.values(constants_1.CN_REPORT_TYPE_MAP[key].headers));
+                const headers = lodash_1.default.get(constants_1.CN_REPORT_TYPE_MAP, `${key}.headers`);
+                if (value && headers) {
+                    value.unshift(Object.values(headers));
+                }
                 return value;
             });
             utils_1.exportXlsx(`${constants_2.DATA_PATH}/cn_${new Date().toLocaleString()}.xlsx`, allData);
         });
+    },
+    checkStock(code) {
+        return /\d{6}/.test(code);
     }
 };
+//# sourceMappingURL=index.js.map

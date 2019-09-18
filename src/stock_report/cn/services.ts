@@ -2,12 +2,9 @@ import _ from "lodash";
 import strRandom from "string-random";
 import { decodeData } from "./utils";
 import { getCache, fetchHTML, updateCache, fetchJsonp } from "../utils";
-import {
-  ReportTypeWithoutStandard,
-  CN_REPORT_TYPE_MAP,
-  TOKEN
-} from "./constants";
+import { CN_REPORT_TYPE_MAP, TOKEN } from "./constants";
 import { StringKV } from "../../typing";
+import { ReportTypeWithoutStandard } from "../constants";
 
 export function fetchStandard(code: string): Promise<StringKV[]> {
   return getCache({

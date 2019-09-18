@@ -7,5 +7,6 @@ export const CURRENT_YEAR: number = new Date().getFullYear();
 export const DEAL_YEAR: number = CURRENT_YEAR - 4;
 
 export type ReportType = "cash" | "profit" | "balance" | "standard"; // cash - 现金流量 profit - 利润 balance - 资产负债 standard - 基本信息
+export type ReportTypeWithoutStandard = Exclude<ReportType, "standard">;
 export type XlsxData = (string | null | number)[];
-export type XlsxDataMap = Record<Partial<ReportType>, XlsxData[]>;
+export type XlsxDataMap = Partial<Record<ReportType, XlsxData[]>>;

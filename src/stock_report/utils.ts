@@ -3,7 +3,7 @@ import iconv from "iconv-lite";
 import fs from "fs";
 import _ from "lodash";
 import xlsx from "xlsx";
-import { ReportType, CACHE_PATH, XlsxDataMap } from "./constants";
+import { ReportType, CACHE_PATH, XlsxDataMap, XlsxData } from "./constants";
 
 export function fetchHTML(
   url: string,
@@ -81,12 +81,41 @@ export function getCache(options: CacheOpt): Promise<unknown> {
 export function exportXlsx(path: string, dataMap: XlsxDataMap): void {
   const wb = xlsx.utils.book_new();
   Object.keys(dataMap).forEach(key => {
-    const reportType = key as Partial<ReportType>;
-    xlsx.utils.book_append_sheet(
-      wb,
-      xlsx.utils.aoa_to_sheet(dataMap[reportType]),
-      reportType
-    );
+    const reportType = key as ReportType;
+    if (dataMap[reportType]) {
+      xlsx.utils.book_append_sheet(
+        wb,
+        xlsx.utils.aoa_to_sheet(dataMap[reportType] as XlsxData[]),
+        reportType
+      );
+    }
   });
   xlsx.writeFile(wb, path);
+}
+
+export function mergeDataByStock(
+  dataArr: XlsxDataMap[],
+  filterCallback?: (row: XlsxData) => boolean,
+  initData?: XlsxDataMap
+): XlsxDataMap {
+  const allData = initData || {
+    standard: [],
+    cash: [],
+    profit: [],
+    balance: []
+  };
+  dataArr.forEach(allDa => {
+    _.mergeWith(
+      allData,
+      allDa,
+      (objValue: XlsxData[], srcValue: XlsxData[]) => {
+        if (typeof filterCallback === "function") {
+          const filterRes = srcValue.filter(filterCallback);
+          return objValue.concat(filterRes);
+        }
+        return objValue.concat(srcValue);
+      }
+    );
+  });
+  return allData;
 }

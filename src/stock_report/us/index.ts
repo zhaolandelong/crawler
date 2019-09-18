@@ -1,14 +1,15 @@
-import _ from "lodash";
-import { fetchData } from "./services";
-import { HK_REPORT_TYPE_MAP } from "./constants";
 import {
-  ReportType,
-  DEAL_YEAR,
-  DATA_PATH,
+  XlsxDataMap,
   XlsxData,
-  XlsxDataMap
+  ReportTypeWithoutStandard,
+  DATA_PATH,
+  DEAL_YEAR,
+  CURRENT_YEAR
 } from "../constants";
+import { US_REPORT_TYPE_MAP } from "./constants";
+import _ from "lodash";
 import { exportXlsx, mergeDataByStock } from "../utils";
+import { fetchData } from "./services";
 
 export default {
   run(codeArr: string[]): void {
@@ -19,19 +20,12 @@ export default {
           setTimeout(() => {
             const promiseArr: Promise<XlsxData[]>[] = [];
             const dataMap = {} as XlsxDataMap;
-            Object.keys(HK_REPORT_TYPE_MAP).forEach(key => {
-              const reportType = key as ReportType;
+            Object.keys(US_REPORT_TYPE_MAP).forEach(key => {
+              const reportType = key as ReportTypeWithoutStandard;
               promiseArr.push(
-                fetchData({
-                  code,
-                  reportType
-                }).then(res => {
-                  const result = res.map(row => {
-                    row.unshift(code);
-                    return row;
-                  });
-                  dataMap[reportType] = result;
-                  return result;
+                fetchData(code, reportType).then(res => {
+                  dataMap[reportType] = res;
+                  return res;
                 })
               );
             });
@@ -41,7 +35,9 @@ export default {
               // 每个都生成单独的文件
               // 加头
               // Object.entries(dataMap).forEach(([key, value]) => {
-              //   value.unshift(HK_REPORT_TYPE_MAP[key as ReportType].headers);
+              //   value.unshift(
+              //     US_REPORT_TYPE_MAP[key as ReportTypeWithoutStandard].headers
+              //   );
               //   return value;
               // });
               // exportXlsx(`${DATA_PATH}/${code}.xlsx`, dataMap);
@@ -51,26 +47,30 @@ export default {
       );
     });
     Promise.all(allPromise).then(allDataArr => {
-      const allData = mergeDataByStock(
-        allDataArr,
-        row => typeof row[1] === "string" && row[1] > String(DEAL_YEAR)
-      );
-
+      const allData = mergeDataByStock(allDataArr, row => {
+        if (typeof row[1] === "string" && typeof row[2] === "string") {
+          return (
+            (row[1] === "quarter" && row[2] > String(CURRENT_YEAR)) ||
+            (row[1] === "annual" && row[2] > String(DEAL_YEAR))
+          );
+        }
+        return false;
+      });
       // 加头
       Object.entries(allData).forEach(([key, value]) => {
-        const headers = _.get(HK_REPORT_TYPE_MAP, `${key}.headers`);
+        const headers = _.get(US_REPORT_TYPE_MAP, `${key}.headers`);
         if (value && headers) {
           value.unshift(headers);
         }
         return value;
       });
       exportXlsx(
-        `${DATA_PATH}/hk_${new Date().toLocaleString()}.xlsx`,
+        `${DATA_PATH}/us_${new Date().toLocaleString()}.xlsx`,
         allData
       );
     });
   },
   checkStock(code: string): boolean {
-    return /\d{5}/.test(code);
+    return /^[A-Za-z]+$/.test(code);
   }
 };
