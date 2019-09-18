@@ -2,7 +2,6 @@
 .vscode
 node_modules/
 data/*.xlsx
-mock/
 cache/
 npm-debug.log*
 yarn-debug.log*
