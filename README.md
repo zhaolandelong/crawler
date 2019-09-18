@@ -1,16 +1,27 @@
 # Crawler
 
-## 1. stock report v1.0
-Catch stock report data from http://quote.eastmoney.com/.
+## 1. Stock report
+Catch stock report data from http://quote.eastmoney.com/ (China) and http://stock.finance.sina.com.cn (HK & US). And then export recnet **4 years** data to `.xlsx`.
+  
+- ### Runtime eviroment
+1. You should install [nodejs](https://nodejs.org/en/) first.
+2. Download this repo to local.
+3. Enter the project path and install dependencies
+``` bash
+# use npm
+$ npm i
+
+# or use yarn
+$ yarn
+```
+
 - ### Run the program
-If on Windows OS, double click the `data/_stock.bat` can also start the program. Or you can use the command below on any OS:
+If on Windows OS, double click the `data/_stock.bat` can start the program, or you can run the command below at the project root path:
 ``` bash
 $ npm run stock
 ```
 - ### Input the stock code
-If want search multiple, use `,` to split. 
-Then you will get recent 50 balance, cash, performance, profit data of each stock which will be saved in `data/` as `csv` files. These files are writen into `.ignore` file, so they won't be upload to the repo.
-**What's more?**
-Some important fields *(only all current year data and recent **3 years** year-data)* will be appended to `data/diy_report.csv`.
-- ### Deal with the `diy_report.csv`
-You'd better to trans the `.csv` to `.xls`, because it's really more benifit. Then deal with the data as you want.
+If want search multiple, use `,` to split. The code should be like `600519`(China), `00700`(HK) or `goog`(US). They could be split auto by group of `cn`, `hk` and `us`.
+
+- ### Deal with the output
+The `.xlsx` files will be export to `data/` and named like `cn_2019-9-18 15/31/42.xlsx`. Do what you want!
