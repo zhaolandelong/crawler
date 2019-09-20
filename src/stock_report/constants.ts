@@ -10,3 +10,7 @@ export type ReportType = "cash" | "profit" | "balance" | "standard"; // cash - ç
 export type ReportTypeWithoutStandard = Exclude<ReportType, "standard">;
 export type XlsxData = (string | null | number)[];
 export type XlsxDataMap = Partial<Record<ReportType, XlsxData[]>>;
+export type StockObj = {
+  code: string;
+  name: string;
+};

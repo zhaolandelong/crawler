@@ -11,7 +11,7 @@ const utils_1 = require("../utils");
 exports.default = {
     run(codeArr) {
         const allPromise = [];
-        codeArr.forEach(code => {
+        codeArr.forEach(({ code }) => {
             allPromise.push(new Promise((rev, rej) => {
                 setTimeout(() => {
                     const promiseArr = [];

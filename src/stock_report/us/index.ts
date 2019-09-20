@@ -4,7 +4,8 @@ import {
   ReportTypeWithoutStandard,
   DATA_PATH,
   DEAL_YEAR,
-  CURRENT_YEAR
+  CURRENT_YEAR,
+  StockObj
 } from "../constants";
 import { US_REPORT_TYPE_MAP } from "./constants";
 import _ from "lodash";
@@ -12,9 +13,9 @@ import { exportXlsx, mergeDataByStock } from "../utils";
 import { fetchData } from "./services";
 
 export default {
-  run(codeArr: string[]): void {
+  run(codeArr: StockObj[]): void {
     const allPromise: Promise<XlsxDataMap>[] = [];
-    codeArr.forEach(code => {
+    codeArr.forEach(({ code }) => {
       allPromise.push(
         new Promise((rev, rej) => {
           setTimeout(() => {

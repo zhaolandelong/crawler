@@ -6,14 +6,15 @@ import {
   DEAL_YEAR,
   DATA_PATH,
   XlsxData,
-  XlsxDataMap
+  XlsxDataMap,
+  StockObj
 } from "../constants";
 import { exportXlsx, mergeDataByStock } from "../utils";
 
 export default {
-  run(codeArr: string[]): void {
+  run(codeArr: StockObj[]): void {
     const allPromise: Promise<XlsxDataMap>[] = [];
-    codeArr.forEach(code => {
+    codeArr.forEach(({ code }) => {
       allPromise.push(
         new Promise((rev, rej) => {
           setTimeout(() => {

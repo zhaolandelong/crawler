@@ -30,12 +30,23 @@ function fetchHTML(url, options) {
 }
 exports.fetchHTML = fetchHTML;
 function fetchJsonp(url, params = null, callback = "callback") {
-    return axios_1.default(url, { params }).then(res => {
+    return axios_1.default({ url, params }).then(res => {
         eval(res.data.replace("var ", "global."));
         return eval(`global.${callback}`);
     });
 }
 exports.fetchJsonp = fetchJsonp;
+function fetchNameByCode(code) {
+    const cb = `suggestdata_${Date.now()}`;
+    // type: 11 - A股 31 - 港股 41 - 美股
+    return fetchHTML(`https://suggest3.sinajs.cn/suggest/type=11,31,41&key=${code}&name=${cb}`).then(res => {
+        const matchStr = lodash_1.default.get(res.match(/"(.+)"/), "[1]", "");
+        const fisrtRes = lodash_1.default.get(matchStr.split(";"), "[0]", "");
+        const codeName = fisrtRes.split(",")[4];
+        return codeName;
+    });
+}
+exports.fetchNameByCode = fetchNameByCode;
 function updateCache(options) {
     const { code, reportType, data, cachePath = constants_1.CACHE_PATH } = options;
     const path = `${cachePath}/${code}_${reportType}.json`;

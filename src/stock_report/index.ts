@@ -1,10 +1,12 @@
 import inquirer from "inquirer";
 import fs from "fs";
 import path from "path";
-import { DATA_PATH, CACHE_PATH } from "./constants";
+import _ from "lodash";
+import { DATA_PATH, CACHE_PATH, StockObj } from "./constants";
 import cn from "./cn";
 import hk from "./hk";
 import us from "./us";
+import { fetchNameByCode } from "./utils";
 
 const history = require(path.resolve(DATA_PATH, "./history.json"));
 
@@ -22,49 +24,55 @@ inquirer
       type: "input",
       name: "stockCodeList",
       message: "Please input stock code:"
-      // validate: function(input) {
-      //   if (isNaN(input)) {
-      //     return "Must be number!";
-      //   }
-      //   return true;
-      // }
     }
   ])
   .then(answers => {
     const { stockCodeList } = answers;
-    const cnList: string[] = [];
-    const hkList: string[] = [];
-    const usList: string[] = [];
+    const cnList: StockObj[] = [];
+    const hkList: StockObj[] = [];
+    const usList: StockObj[] = [];
+    const promiseArr: Promise<StockObj>[] = [];
     stockCodeList
       .replace(/\s+/g, "")
       .split(",")
-      .forEach((stockCode: string) => {
-        if (cn.checkStock(stockCode)) {
-          cnList.push(stockCode);
-          if (history.cn.indexOf(stockCode) === -1) {
-            history.cn.push(stockCode);
-          }
-        } else if (hk.checkStock(stockCode)) {
-          hkList.push(stockCode);
-          if (history.hk.indexOf(stockCode) === -1) {
-            history.hk.push(stockCode);
-          }
-        } else if (us.checkStock(stockCode)) {
-          usList.push(stockCode);
-          if (history.us.indexOf(stockCode) === -1) {
-            history.us.push(stockCode);
-          }
-        }
+      .forEach((code: string) => {
+        promiseArr.push(
+          fetchNameByCode(code).then(name => {
+            const obj = {
+              code,
+              name
+            };
+            if (cn.checkStock(code)) {
+              cnList.push(obj);
+              if (!history.cn.find((obj: StockObj) => obj.code === code)) {
+                history.cn.push(obj);
+              }
+            } else if (hk.checkStock(code)) {
+              hkList.push(obj);
+              if (!history.hk.find((obj: StockObj) => obj.code === code)) {
+                history.hk.push(obj);
+              }
+            } else if (us.checkStock(code)) {
+              usList.push(obj);
+              if (!history.us.find((obj: StockObj) => obj.code === code)) {
+                history.us.push(obj);
+              }
+            }
+            return obj;
+          })
+        );
       });
-    fs.writeFile(
-      path.resolve(DATA_PATH, "./history.json"),
-      JSON.stringify(history, null, 2),
-      "utf8",
-      err => {
-        if (err) console.warn(err);
-      }
-    );
-    if (cnList.length > 0) cn.run(cnList);
-    if (hkList.length > 0) hk.run(hkList);
-    if (usList.length > 0) us.run(usList);
+    Promise.all(promiseArr).then(() => {
+      fs.writeFile(
+        path.resolve(DATA_PATH, "./history.json"),
+        JSON.stringify(history, null, 2),
+        "utf8",
+        err => {
+          if (err) console.warn(err);
+        }
+      );
+      if (cnList.length > 0) cn.run(cnList);
+      if (hkList.length > 0) hk.run(hkList);
+      if (usList.length > 0) us.run(usList);
+    });
   });

@@ -7,15 +7,16 @@ import {
   CURRENT_YEAR,
   DATA_PATH,
   XlsxDataMap,
-  XlsxData
+  XlsxData,
+  StockObj
 } from "../constants";
 import { exportXlsx, mergeDataByStock } from "../utils";
 import { formatObj2ArrByHeader, dataFilterCallback } from "./utils";
 
 export default {
-  run(codeArr: string[]) {
+  run(codeArr: StockObj[]) {
     const allPromise: Promise<XlsxDataMap>[] = [];
-    codeArr.forEach(code => {
+    codeArr.forEach(({ code }) => {
       allPromise.push(
         new Promise((rev, rej) => {
           setTimeout(() => {

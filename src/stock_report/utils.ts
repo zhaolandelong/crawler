@@ -35,9 +35,22 @@ export function fetchJsonp(
   params: any = null,
   callback: string = "callback"
 ) {
-  return axios(url, { params }).then(res => {
+  return axios({ url, params }).then(res => {
     eval(res.data.replace("var ", "global."));
     return eval(`global.${callback}`);
+  });
+}
+
+export function fetchNameByCode(code: string): Promise<string> {
+  const cb = `suggestdata_${Date.now()}`;
+  // type: 11 - A股 31 - 港股 41 - 美股
+  return fetchHTML(
+    `https://suggest3.sinajs.cn/suggest/type=11,31,41&key=${code}&name=${cb}`
+  ).then(res => {
+    const matchStr = _.get(res.match(/"(.+)"/), "[1]", "");
+    const fisrtRes = _.get(matchStr.split(";"), "[0]", "");
+    const codeName = fisrtRes.split(",")[4];
+    return codeName;
   });
 }
 
