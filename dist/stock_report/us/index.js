@@ -11,14 +11,14 @@ const services_1 = require("./services");
 exports.default = {
     run(codeArr) {
         const allPromise = [];
-        codeArr.forEach(({ code }) => {
+        codeArr.forEach(({ code, name }) => {
             allPromise.push(new Promise((rev, rej) => {
                 setTimeout(() => {
                     const promiseArr = [];
                     const dataMap = {};
                     Object.keys(constants_2.US_REPORT_TYPE_MAP).forEach(key => {
                         const reportType = key;
-                        promiseArr.push(services_1.fetchData(code, reportType).then(res => {
+                        promiseArr.push(services_1.fetchData(code, reportType, name).then(res => {
                             dataMap[reportType] = res;
                             return res;
                         }));
@@ -40,9 +40,9 @@ exports.default = {
         });
         Promise.all(allPromise).then(allDataArr => {
             const allData = utils_1.mergeDataByStock(allDataArr, row => {
-                if (typeof row[1] === "string" && typeof row[2] === "string") {
-                    return ((row[1] === "quarter" && row[2] > String(constants_1.CURRENT_YEAR)) ||
-                        (row[1] === "annual" && row[2] > String(constants_1.DEAL_YEAR)));
+                if (typeof row[2] === "string" && typeof row[3] === "string") {
+                    return ((row[2] === "quarter" && row[3] > String(constants_1.CURRENT_YEAR)) ||
+                        (row[2] === "annual" && row[3] > String(constants_1.DEAL_YEAR)));
                 }
                 return false;
             });

@@ -14,7 +14,7 @@ import { exportXlsx, mergeDataByStock } from "../utils";
 export default {
   run(codeArr: StockObj[]): void {
     const allPromise: Promise<XlsxDataMap>[] = [];
-    codeArr.forEach(({ code }) => {
+    codeArr.forEach(({ code, name }) => {
       allPromise.push(
         new Promise((rev, rej) => {
           setTimeout(() => {
@@ -28,7 +28,7 @@ export default {
                   reportType
                 }).then(res => {
                   const result = res.map(row => {
-                    row.unshift(code);
+                    row.unshift(code, name);
                     return row;
                   });
                   dataMap[reportType] = result;
@@ -54,7 +54,7 @@ export default {
     Promise.all(allPromise).then(allDataArr => {
       const allData = mergeDataByStock(
         allDataArr,
-        row => typeof row[1] === "string" && row[1] > String(DEAL_YEAR)
+        row => typeof row[2] === "string" && row[2] > String(DEAL_YEAR)
       );
 
       // 加头

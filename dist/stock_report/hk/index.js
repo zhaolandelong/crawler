@@ -11,7 +11,7 @@ const utils_1 = require("../utils");
 exports.default = {
     run(codeArr) {
         const allPromise = [];
-        codeArr.forEach(({ code }) => {
+        codeArr.forEach(({ code, name }) => {
             allPromise.push(new Promise((rev, rej) => {
                 setTimeout(() => {
                     const promiseArr = [];
@@ -23,7 +23,7 @@ exports.default = {
                             reportType
                         }).then(res => {
                             const result = res.map(row => {
-                                row.unshift(code);
+                                row.unshift(code, name);
                                 return row;
                             });
                             dataMap[reportType] = result;
@@ -44,7 +44,7 @@ exports.default = {
             }));
         });
         Promise.all(allPromise).then(allDataArr => {
-            const allData = utils_1.mergeDataByStock(allDataArr, row => typeof row[1] === "string" && row[1] > String(constants_2.DEAL_YEAR));
+            const allData = utils_1.mergeDataByStock(allDataArr, row => typeof row[2] === "string" && row[2] > String(constants_2.DEAL_YEAR));
             // 加头
             Object.entries(allData).forEach(([key, value]) => {
                 const headers = lodash_1.default.get(constants_1.HK_REPORT_TYPE_MAP, `${key}.headers`);

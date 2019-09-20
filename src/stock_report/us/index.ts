@@ -15,7 +15,7 @@ import { fetchData } from "./services";
 export default {
   run(codeArr: StockObj[]): void {
     const allPromise: Promise<XlsxDataMap>[] = [];
-    codeArr.forEach(({ code }) => {
+    codeArr.forEach(({ code, name }) => {
       allPromise.push(
         new Promise((rev, rej) => {
           setTimeout(() => {
@@ -24,7 +24,7 @@ export default {
             Object.keys(US_REPORT_TYPE_MAP).forEach(key => {
               const reportType = key as ReportTypeWithoutStandard;
               promiseArr.push(
-                fetchData(code, reportType).then(res => {
+                fetchData(code, reportType, name).then(res => {
                   dataMap[reportType] = res;
                   return res;
                 })
@@ -49,10 +49,10 @@ export default {
     });
     Promise.all(allPromise).then(allDataArr => {
       const allData = mergeDataByStock(allDataArr, row => {
-        if (typeof row[1] === "string" && typeof row[2] === "string") {
+        if (typeof row[2] === "string" && typeof row[3] === "string") {
           return (
-            (row[1] === "quarter" && row[2] > String(CURRENT_YEAR)) ||
-            (row[1] === "annual" && row[2] > String(DEAL_YEAR))
+            (row[2] === "quarter" && row[3] > String(CURRENT_YEAR)) ||
+            (row[2] === "annual" && row[3] > String(DEAL_YEAR))
           );
         }
         return false;

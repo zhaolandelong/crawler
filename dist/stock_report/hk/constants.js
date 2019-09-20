@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const STANDARD_HEADERS = [
     "股票代码",
+    "股票名称",
     "开始日期",
     "截止日期",
     "公告日期",
@@ -21,6 +22,7 @@ const STANDARD_HEADERS = [
 ];
 const BALANCE_HEADERS = [
     "股票代码",
+    "股票名称",
     "报告期",
     "报表类型",
     "非流动资产",
@@ -51,6 +53,7 @@ const BALANCE_HEADERS = [
 ];
 const CASH_HEADERS = [
     "股票代码",
+    "股票名称",
     "报告期",
     "报表类型",
     "经营业务所得之现金流入净额",
@@ -65,6 +68,7 @@ const CASH_HEADERS = [
 ];
 const PROFIT_HEADERS = [
     "股票代码",
+    "股票名称",
     "报告期",
     "报表类型",
     "营业额",

@@ -7,7 +7,7 @@ const cheerio_1 = __importDefault(require("cheerio"));
 const lodash_1 = __importDefault(require("lodash"));
 const utils_1 = require("../utils");
 const constants_1 = require("./constants");
-function fetchData(code, reportType) {
+function fetchData(code, reportType, name) {
     return utils_1.getCache({
         code,
         reportType
@@ -16,8 +16,8 @@ function fetchData(code, reportType) {
             return cacheData;
         const { type, headers } = constants_1.US_REPORT_TYPE_MAP[reportType];
         return Promise.all([
-            fetchDataByPeriod(code, type, "quarter"),
-            fetchDataByPeriod(code, type, "annual")
+            fetchDataByPeriod(code, type, "quarter", name || code),
+            fetchDataByPeriod(code, type, "annual", name || code)
         ]).then(resArr => {
             const result = lodash_1.default.concat(...resArr);
             utils_1.updateCache({
@@ -31,7 +31,7 @@ function fetchData(code, reportType) {
     });
 }
 exports.fetchData = fetchData;
-function fetchDataByPeriod(code, type, period) {
+function fetchDataByPeriod(code, type, period, name) {
     return utils_1.fetchHTML(`http://quotes.sina.com.cn/usstock/hq/${type}.php?s=${code}&t=${period}`).then(htmlStr => {
         const tmp = [];
         const $ = cheerio_1.default.load(htmlStr);
@@ -48,7 +48,7 @@ function fetchDataByPeriod(code, type, period) {
             });
             tmp.push(rowData);
         });
-        const result = tmp[0].map((col, i) => [code, period].concat(tmp.map(row => row[i])));
+        const result = tmp[0].map((col, i) => [code, name, period].concat(tmp.map(row => row[i])));
         return result;
     });
 }

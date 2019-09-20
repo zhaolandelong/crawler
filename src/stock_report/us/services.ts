@@ -6,7 +6,8 @@ import { USQueryType, US_REPORT_TYPE_MAP } from "./constants";
 
 export function fetchData(
   code: string,
-  reportType: ReportTypeWithoutStandard
+  reportType: ReportTypeWithoutStandard,
+  name?: string
 ): Promise<XlsxData[]> {
   return getCache({
     code,
@@ -15,8 +16,8 @@ export function fetchData(
     if (cacheData) return cacheData as XlsxData[];
     const { type, headers } = US_REPORT_TYPE_MAP[reportType];
     return Promise.all([
-      fetchDataByPeriod(code, type, "quarter"),
-      fetchDataByPeriod(code, type, "annual")
+      fetchDataByPeriod(code, type, "quarter", name || code),
+      fetchDataByPeriod(code, type, "annual", name || code)
     ]).then(resArr => {
       const result: XlsxData[] = _.concat(...resArr);
 
@@ -35,7 +36,8 @@ export function fetchData(
 function fetchDataByPeriod(
   code: string,
   type: USQueryType,
-  period: "quarter" | "annual"
+  period: "quarter" | "annual",
+  name: string
 ): Promise<XlsxData[]> {
   return fetchHTML(
     `http://quotes.sina.com.cn/usstock/hq/${type}.php?s=${code}&t=${period}`
@@ -59,7 +61,7 @@ function fetchDataByPeriod(
       tmp.push(rowData);
     });
     const result = tmp[0].map((col, i) =>
-      [code, period].concat(tmp.map(row => row[i]))
+      [code, name, period].concat(tmp.map(row => row[i]))
     );
     return result;
   });

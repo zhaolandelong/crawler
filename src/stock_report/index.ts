@@ -17,7 +17,6 @@ if (!fs.existsSync(DATA_PATH)) {
 if (!fs.existsSync(CACHE_PATH)) {
   fs.mkdirSync(CACHE_PATH);
 }
-
 inquirer
   .prompt([
     {
