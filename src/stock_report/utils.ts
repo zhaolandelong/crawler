@@ -1,9 +1,12 @@
 import axios from "axios";
 import iconv from "iconv-lite";
 import fs from "fs";
+import path from "path";
 import _ from "lodash";
 import xlsx from "xlsx";
-import { ReportType, CACHE_PATH, XlsxDataMap, XlsxData } from "./constants";
+import { ReportType, CACHE_PATH, XlsxDataMap, XlsxData, DATA_PATH, StockObj } from "./constants";
+
+const history = require(path.resolve(DATA_PATH, "./history.json"));
 
 export function fetchHTML(
   url: string,
@@ -42,6 +45,21 @@ export function fetchJsonp(
 }
 
 export function fetchNameByCode(code: string): Promise<string> {
+  let codeName: string = '';
+  Object.values(history).some((objArr) => {
+    return (objArr as StockObj[]).some(obj => {
+      if (obj.code === code) {
+        codeName = obj.name;
+        return true;
+      }
+      return false;
+    });
+  });
+  if (codeName) {
+    return new Promise((rev, rej) => {
+      rev(codeName)
+    });
+  }
   const cb = `suggestdata_${Date.now()}`;
   // type: 11 - A股 31 - 港股 41 - 美股
   return fetchHTML(
@@ -49,7 +67,7 @@ export function fetchNameByCode(code: string): Promise<string> {
   ).then(res => {
     const matchStr = _.get(res.match(/"(.+)"/), "[1]", "");
     const fisrtRes = _.get(matchStr.split(";"), "[0]", "");
-    const codeName = fisrtRes.split(",")[4];
+    codeName = fisrtRes.split(",")[4];
     return codeName;
   });
 }

@@ -6,9 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const iconv_lite_1 = __importDefault(require("iconv-lite"));
 const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const lodash_1 = __importDefault(require("lodash"));
 const xlsx_1 = __importDefault(require("xlsx"));
 const constants_1 = require("./constants");
+const history = require(path_1.default.resolve(constants_1.DATA_PATH, "./history.json"));
 function fetchHTML(url, options) {
     return new Promise((rev, rej) => {
         axios_1.default({
@@ -37,12 +39,27 @@ function fetchJsonp(url, params = null, callback = "callback") {
 }
 exports.fetchJsonp = fetchJsonp;
 function fetchNameByCode(code) {
+    let codeName = '';
+    Object.values(history).some((objArr) => {
+        return objArr.some(obj => {
+            if (obj.code === code) {
+                codeName = obj.name;
+                return true;
+            }
+            return false;
+        });
+    });
+    if (codeName) {
+        return new Promise((rev, rej) => {
+            rev(codeName);
+        });
+    }
     const cb = `suggestdata_${Date.now()}`;
     // type: 11 - A股 31 - 港股 41 - 美股
     return fetchHTML(`https://suggest3.sinajs.cn/suggest/type=11,31,41&key=${code}&name=${cb}`).then(res => {
         const matchStr = lodash_1.default.get(res.match(/"(.+)"/), "[1]", "");
         const fisrtRes = lodash_1.default.get(matchStr.split(";"), "[0]", "");
-        const codeName = fisrtRes.split(",")[4];
+        codeName = fisrtRes.split(",")[4];
         return codeName;
     });
 }
