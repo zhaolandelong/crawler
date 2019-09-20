@@ -48,7 +48,7 @@ function fetchDataByPeriod(code, type, period, name) {
             });
             tmp.push(rowData);
         });
-        const result = tmp[0].map((col, i) => [code, name, period].concat(tmp.map(row => row[i])));
+        const result = (tmp[0] || []).map((col, i) => [code, name, period].concat(tmp.map(row => row[i])));
         return result;
     });
 }

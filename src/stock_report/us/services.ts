@@ -60,7 +60,7 @@ function fetchDataByPeriod(
         });
       tmp.push(rowData);
     });
-    const result = tmp[0].map((col, i) =>
+    const result = (tmp[0] || []).map((col, i) =>
       [code, name, period].concat(tmp.map(row => row[i]))
     );
     return result;
