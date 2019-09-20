@@ -2,6 +2,9 @@
 .vscode
 node_modules/
 data/*.xlsx
+!data/cn_total.xlsx
+!data/hk_total.xlsx
+!data/us_total.xlsx
 cache/
 npm-debug.log*
 yarn-debug.log*
