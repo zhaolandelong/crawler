@@ -66,7 +66,7 @@ export default {
         return value;
       });
       exportXlsx(
-        `${DATA_PATH}/us_${new Date().toLocaleString()}.xlsx`,
+        `${DATA_PATH}/us_${new Date()}.xlsx`,
         allData
       );
     });

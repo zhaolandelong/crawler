@@ -91,7 +91,7 @@ export default {
         return value;
       });
       exportXlsx(
-        `${DATA_PATH}/cn_${new Date().toLocaleString()}.xlsx`,
+        `${DATA_PATH}/cn_${new Date()}.xlsx`,
         allData
       );
     });

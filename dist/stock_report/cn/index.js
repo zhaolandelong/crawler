@@ -62,7 +62,7 @@ exports.default = {
                 }
                 return value;
             });
-            utils_1.exportXlsx(`${constants_2.DATA_PATH}/cn_${new Date().toLocaleString()}.xlsx`, allData);
+            utils_1.exportXlsx(`${constants_2.DATA_PATH}/cn_${new Date()}.xlsx`, allData);
         });
     },
     checkStock(code) {
